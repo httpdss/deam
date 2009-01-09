@@ -1,4 +1,4 @@
-= Django external apps downloader =
+= Django external apps downloader v0.1=
 
 IMPORTANT: not for use on production sites (for now)
 
@@ -8,10 +8,7 @@ This project is focused on resolving the recurring problem of managing external 
 
 1) Download application from Github
 2) Make sure the application is under a django project or is added to the python path
-3) Add 'external_downloads' on the INSTALLED_APPS variable of your django project
-4) Define the folder of your external applications by setting a new variable on your django settings project
-    EXTERNAL_APPS_FOLDER = '/path/to/external_apps'
-5) create a file inside the external apps folder and name it external.apps 
+5) create a file inside the external apps folders you want to use and name it external.apps
     this is the file where to set the diferent sources.
     the current format is <application_name> <repository url> <repository type>
 6) execute 
