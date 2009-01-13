@@ -1,5 +1,8 @@
 import os, sys, subprocess, logging
-import pysvn
+try:
+    import pysvn
+except ImportError:
+    import svn as pysvn
 
 from os.path import exists, join
 from os import pathsep
