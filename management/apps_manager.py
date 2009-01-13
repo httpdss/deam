@@ -7,6 +7,8 @@ from string import split
 from external_downloads.management.utils import get_project_root, directory_for_file
 
 #TODO alert the user to add the folders to the python path
+#TODO wsgi generator based on external.apps file location
+#
 
 APPS_FILE = 'external.apps'
 
@@ -59,6 +61,11 @@ class RepositoryHandler(list):
         """
         list.__init__(self)
         self.location = location
+        self.logger = logging.getLogger('repository_handler')
+        self.logger.setLevel(logging.INFO)
+        st = logging.StreamHandler()
+        st.setLevel(logging.INFO)
+        self.logger.addHandler(st)
 
     def show_alert(self):
         """
@@ -68,7 +75,7 @@ class RepositoryHandler(list):
     def download_apps(self):
         """
         """
-        logging.debug("Starting to download apps...")
+        self.logger.info("Starting to download apps...")
 
         for app in self:
             vcs_type = app.vcs_type
@@ -79,7 +86,7 @@ class RepositoryHandler(list):
             else:
                 self._download_from_mercurial(app)
 
-        logging.debug("Finished downloading apps")
+        self.logger.info("Finished downloading apps")
 
     def _download_from_svn(self,app):
         """
@@ -87,10 +94,10 @@ class RepositoryHandler(list):
         app -- an ExternalApp object of type svn
         """
         assert app.vcs_type == 'svn'
-        logging.debug("Checking out %s" % app.name)
+        self.logger.info("Checking out %s" % app.name)
         client = pysvn.Client()
         client.checkout(app.url,"%s/%s" % (self.location,app.name))
-        logging.debug("Checkout completed")
+        self.logger.debug("Checkout completed")
 
     def _download_from_git(self,app):
         """
@@ -137,11 +144,36 @@ class AppsManager(object):
             rh = RepositoryHandler(folder)
             rh.execute()
 
+    def generate_wsgi(self, settings_path):
+        """
+        
+        """
+        #TODO add libs support
+        wsgi_file = open('django.wsgi.tmp','w')
+        wsgi_file.writelines([
+            'import os\n',
+            'import sys\n'
+            'sys.stdout = sys.stderr\n'
+            'from os.path import abspath, dirname, join\n',
+            'from site import addsitedir\n',
+            'path = addsitedir(abspath(join(dirname(__file__), \'django-hotclub\', \'external_libs\')), set())\n',
+            'if path: sys.path = list(path) + sys.path\n'])
+
+        #add all folders to python path
+        for folder in self.app_folders:
+            wsgi_file.write( 'sys.path.insert(0, abspath(\'%s\'))\n' % folder)
+
+        wsgi_file.writelines([
+            '\n',
+            'from django.core.handlers.wsgi import WSGIHandler\n',
+            '\n',
+            'os.environ[\'DJANGO_SETTINGS_MODULE\'] = \'%s\'\n' % settings_path,
+            '\n',
+            'application = WSGIHandler()\n' ])
+
 def test_main():
-    am = AppsManager('/home/kenny/testing')
-    am.execute()
+    am = AppsManager('/home/kenny/testing',)
+    am.generate_wsgi('test.settings')
 
 if __name__ == '__main__':
     test_main()
-
-# vim: ai ts=4 sts=4 et sw=4
