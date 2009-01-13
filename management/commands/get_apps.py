@@ -9,10 +9,10 @@ from os import pathsep
 from string import split
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-from external_downloads.management.apps_manager import AppsManager
+from deam.management.apps_manager import AppsManager
 
 #taken from django_extensions
-from external_downloads.management.utils import get_project_root
+from deam.management.utils import get_project_root
 
 class Command(BaseCommand):
 

@@ -1,6 +1,6 @@
-====================================
-Django external apps downloader v0.2
-====================================
+========================================
+DEAM v0.3 (Django External Apps Manager) 
+========================================
 
 **IMPORTANT: not for use on production sites (for now)**
 

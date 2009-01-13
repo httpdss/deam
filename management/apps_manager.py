@@ -7,7 +7,7 @@ except ImportError:
 from os.path import exists, join
 from os import pathsep
 from string import split
-from external_downloads.management.utils import get_project_root, directory_for_file
+from deam.management.utils import get_project_root, directory_for_file
 
 #TODO alert the user to add the folders to the python path
 #TODO wsgi generator based on external.apps file location
