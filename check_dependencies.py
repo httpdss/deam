@@ -2,10 +2,7 @@ def main():
     """
     
     """
-    try:
-        import pysvn
-    except ImportError:
-        print "pysvn is not on your python path. Please install it in order to run this application correctly"
+    print "No dependencies missing"
 
 
 if __name__ == '__main__':

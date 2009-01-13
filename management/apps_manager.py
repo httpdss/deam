@@ -1,13 +1,10 @@
 import os, sys, subprocess, logging
-try:
-    import pysvn
-except ImportError:
-    import svn as pysvn
 
-from os.path import exists, join
+from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
 from string import split
 from deam.management.utils import get_project_root, directory_for_file
+from subprocess import call
 
 #TODO alert the user to add the folders to the python path
 #TODO wsgi generator based on external.apps file location
@@ -79,46 +76,44 @@ class RepositoryHandler(list):
         """
         """
         self.logger.info("Starting to download apps...")
-
         for app in self:
-            vcs_type = app.vcs_type
-            if (vcs_type == 'svn'):
-                self._download_from_svn(app)
-            elif (vcs_type == 'git'):
-                self._download_from_git(app)
-            else:
-                self._download_from_mercurial(app)
-
+            if lexists(join(self.location,app.name)):
+                self.logger.info("Updating %s" % app.name)
+                self._repo_update(app)
+                self.logger.debug("Update completed")
+            else: 
+                self.logger.info("Downloading %s" % app.name)
+                self._repo_create(app)
+                self.logger.debug("Download completed")
         self.logger.info("Finished downloading apps")
 
-    def _download_from_svn(self,app):
-        """
-        svn checkout method for the selected application
-        app -- an ExternalApp object of type svn
-        """
-        assert app.vcs_type == 'svn'
-        self.logger.info("Checking out %s" % app.name)
-        client = pysvn.Client()
-        client.checkout(app.url,"%s/%s" % (self.location,app.name))
-        self.logger.debug("Checkout completed")
-
-    def _download_from_git(self,app):
-        """
-        app -- an ExternalApp object of type git
-        """
-        assert app.vcs_type == 'git'
-
-    def _download_from_mercurial(self,app):
-        """
-        app -- an ExternalApp object of type hg
-        """
-        assert app.vcs_type == 'hg'
-
+    def _repo_create(self,app):
+        os.chdir("%s" % self.location)
+        if app.vcs_type == 'hg':
+            call(['hg', 'clone', '%s' % app.url, '%s' % app.name])
+        elif app.vcs_type == 'svn':
+            call(['svn','co', '%s' % app.url, '%s' % app.name])
+        elif app.vcs_type == 'git':
+            call(['git', 'clone', '%s' % app.url, '%s' % app.name])
+        else:
+            print('%s has an invalid VCS system' % app.name)
+            
+    def _repo_update(self,app):
+        os.chdir(join(self.location,app.name))
+        if app.vcs_type == 'hg':
+            call(['hg', 'pull', '-u'])
+        elif app.vcs_type == 'svn':
+            call(['svn','update'])
+        elif app.vcs_type == 'git':
+            call(['git', 'pull'])
+        else:
+            print('%s has an invalid VCS system' % app.name)
+        
     def execute(self):
         """
         """
-        apps_file_path = os.path.join(self.location,APPS_FILE)
-        if os.path.exists(apps_file_path):
+        apps_file_path = join(self.location,APPS_FILE)
+        if lexists(apps_file_path):
             infile = open(apps_file_path,'r')
             for line in infile:
                 parts = line.split()
@@ -175,8 +170,8 @@ class AppsManager(object):
             'application = WSGIHandler()\n' ])
 
 def test_main():
-    am = AppsManager('/home/kenny/testing',)
-    am.generate_wsgi('test.settings')
+    am = AppsManager(join(dirname(abspath(__file__)),'..','testing'))
+    am.execute()
 
 if __name__ == '__main__':
     test_main()
