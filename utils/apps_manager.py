@@ -14,6 +14,10 @@ from deam.utils.wsgi_handler import WSGIHandler
 #TODO add libs support
 
 APPS_FILE = 'external.apps'
+REPO_DIRS = {'git': '.gitrepo',
+             'hg': '.hgrepo',
+             'svn': '.svnrepo',
+}
 
 class AppsManager(object):
     """
@@ -31,22 +35,23 @@ class AppsManager(object):
         """
         """
         for folder in self.app_folders:
-            rh = RepositoryHandler(folder,APPS_FILE)
+            print(folder)
+            rh = RepositoryHandler(folder, APPS_FILE, REPO_DIRS)
             rh.execute()
 
     def generate_wsgi(self, settings_path):
         """
         """
         wsgi_handler = WSGIHandler(self.app_folders)
-        wsgi_handler.write_file('django.wsgi.tmp',settings_path)
+        wsgi_handler.write_file('django.wsgi.tmp', settings_path)
 
     def list_external_apps(self):
         for folder in self.app_folders:
-            rh = RepositoryHandler(folder,APPS_FILE)
+            rh = RepositoryHandler(folder,APPS_FILE, REPO_DIRS)
             print rh.list_apps()
 
 def test_main():
-    am = AppsManager('/home/kenny/testing/a')
+    am = AppsManager('/Users/martin/development/python/deam/testing')
     am.execute()
     am.list_external_apps()
 

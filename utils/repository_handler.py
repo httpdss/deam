@@ -1,5 +1,6 @@
 import os, sys, subprocess, logging
 
+from shutil import copytree, rmtree
 from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
 from string import split
@@ -12,13 +13,14 @@ class RepositoryHandler(list):
     This class represents the manager of external apps
     """
 
-    def __init__(self, location, external_apps_file):
+    def __init__(self, location, external_apps_file, repository_directories):
         """
         Constructor.
         """
         list.__init__(self)
         self.location = location
         self.external_apps_file = external_apps_file
+        self.repository_directories = repository_directories
         self.logger = logging.getLogger('repository_handler')
         self.logger.setLevel(logging.INFO)
         st = logging.StreamHandler()
@@ -33,34 +35,63 @@ class RepositoryHandler(list):
     def download_apps(self):
         """
         """
-        self.logger.info("Starting to download apps...")
+        self.logger.info("Downloading apps...")
         for app in self:
-            lexists(join(self.location,app.name)) and self._repo_update(app) or self._repo_create(app)
+            print('Directory: %s' % app.directory)
+            if lexists(join(self.location, app.directory)): 
+                self._repo_update(app)
+            else: self._repo_create(app)
         self.logger.info("Finished downloading apps")
 
-    def _repo_create(self, app):
-        """
-        """
-        os.chdir(self.location)
+    def _repo_create_prepare(self, vcs_type):
+        if lexists(join(self.location, self.repository_directories[vcs_type])): 
+            os.chdir(join(self.location, self.repository_directories[vcs_type]))
+        else:
+            os.makedirs(join(self.location, self.repository_directories[vcs_type]))
+            os.chdir(join(self.location, self.repository_directories[vcs_type]))
+
+    def _repo_move(self, app):
+        if lexists(join(self.location, app.directory)):
+            rmtree(join(self.location, app.directory))
+        copytree(join(self.location, self.repository_directories[app.vcs_type], app.name, app.directory), join(self.location, app.directory))
+        
+    def _repo_create_call(self, app):
         if app.vcs_type == 'hg':
             call(['hg', 'clone', app.url, app.name])
         elif app.vcs_type == 'svn':
             call(['svn','co', app.url, app.name])
         elif app.vcs_type == 'git':
             call(['git', 'clone', app.url, app.name])
+
+    def _repo_create(self, app):
+        """
+        """
+        os.chdir(self.location)
+        if app.vcs_type == 'hg' or app.vcs_type == 'svn' or app.vcs_type == 'git':
+            self._repo_create_prepare(app.vcs_type)
+            self._repo_create_call(app)
+            self._repo_move(app)
         else:
             print('%s has an invalid VCS system' % app.name)
 
+    def _repo_update_prepare(self, app):
+        os.chdir(join(self.location, self.repository_directories[app.vcs_type], app.name))
+    
+    def _repo_update_call(self, vcs_type):
+        if vcs_type == 'hg':
+            call(['hg', 'pull', '-u'])
+        if  vcs_type == 'svn':
+            call(['svn','update'])    
+        elif vcs_type == 'git':
+            call(['git', 'pull'])
+                
     def _repo_update(self, app):
         """
         """
-        os.chdir(join(self.location,app.name))
-        if app.vcs_type == 'hg':
-            call(['hg', 'pull', '-u'])
-        elif app.vcs_type == 'svn':
-            call(['svn','update'])
-        elif app.vcs_type == 'git':
-            call(['git', 'pull'])
+        if app.vcs_type == 'hg' or app.vcs_type == 'svn' or app.vcs_type == 'git':
+            self._repo_update_prepare(app)
+            self._repo_update_call(app.vcs_type)
+            self._repo_move(app)     
         else:
             print('%s has an invalid VCS system' % app.name)
 
@@ -72,7 +103,11 @@ class RepositoryHandler(list):
             infile = open(apps_file_path,'r')
             for line in infile:
                 parts = line.split()
-                self.append(ExternalApp(parts[0],parts[1],parts[2]))
+                try:
+                    self.append(ExternalApp(parts[0],parts[1],parts[2], parts[3]))
+                except IndexError:
+                    print('%s format may be incorrect' % apps_file_path)
+                    continue    
             infile.close()
             if do_download:
                 self.download_apps()

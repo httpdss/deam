@@ -1,3 +1,2 @@
-django-evolution http://django-evolution.googlecode.com/svn/trunk/django_evolution svn
-basic http://django-basic-apps.googlecode.com/svn/trunk/ svn
-tagging http://django-tagging.googlecode.com/svn/trunk/ svn
+basic http://django-basic-apps.googlecode.com/svn/trunk/ svn books
+jellyroll git://github.com/jacobian/jellyroll.git git jellyroll
