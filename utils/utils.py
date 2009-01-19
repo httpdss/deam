@@ -6,7 +6,6 @@ def get_project_root():
     settings_mod = __import__(settings.SETTINGS_MODULE, {}, {}, [''])
     return os.path.dirname(os.path.abspath(settings_mod.__file__))
 
-
 def directory_for_file(dir_name, file_name):
     '''
     '''

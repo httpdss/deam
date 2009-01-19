@@ -3,11 +3,11 @@ import os, sys, subprocess, logging
 from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
 from string import split
-from deam.management.utils import get_project_root, directory_for_file
+from deam.utils.utils import get_project_root, directory_for_file
 from subprocess import call
 
-from deam.management.repository_handler import RepositoryHandler
-from deam.management.wsgi_handler import WSGIHandler
+from deam.utils.repository_handler import RepositoryHandler
+from deam.utils.wsgi_handler import WSGIHandler
 
 #TODO alert the user to add the folders to the python path
 #TODO wsgi generator based on external.apps file location

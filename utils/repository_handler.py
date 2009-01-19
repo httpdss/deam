@@ -3,8 +3,8 @@ import os, sys, subprocess, logging
 from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
 from string import split
-from deam.management.utils import get_project_root, directory_for_file
-from deam.management.external_app import ExternalApp
+from deam.utils.utils import get_project_root, directory_for_file
+from deam.utils.external_app import ExternalApp
 from subprocess import call
 
 class RepositoryHandler(list):
