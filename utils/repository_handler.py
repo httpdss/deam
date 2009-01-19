@@ -64,7 +64,7 @@ class RepositoryHandler(list):
         else:
             print('%s has an invalid VCS system' % app.name)
 
-    def execute(self):
+    def execute(self, do_download=True):
         """
         """
         apps_file_path = join(self.location,self.external_apps_file)
@@ -74,12 +74,18 @@ class RepositoryHandler(list):
                 parts = line.split()
                 self.append(ExternalApp(parts[0],parts[1],parts[2]))
             infile.close()
-            self.download_apps()
+            if do_download:
+                self.download_apps()
         else:
             print "File does not exist"
+    def list_apps(self):
+        print "%s:" % self.location
+        for app in self:
+            print "\t%s\t%s" % (app.name,app.url)
 
 if __name__ == '__main__':
     rh = RepositoryHandler('/home/kenny/testing/a/','external.apps')
-    rh.execute()
+    rh.execute(False)
+    rh.list_apps()
 
 # vim: ai ts=4 sts=4 et sw=4

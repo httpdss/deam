@@ -40,9 +40,15 @@ class AppsManager(object):
         wsgi_handler = WSGIHandler(self.app_folders)
         wsgi_handler.write_file('django.wsgi.tmp',settings_path)
 
+    def list_external_apps(self):
+        for folder in self.app_folders:
+            rh = RepositoryHandler(folder,APPS_FILE)
+            print rh.list_apps()
+
 def test_main():
-    am = AppsManager('/home/kenny/testing/')
-    am.generate_wsgi('papa')
+    am = AppsManager('/home/kenny/testing/a')
+    am.execute()
+    am.list_external_apps()
 
 if __name__ == '__main__':
     test_main()
