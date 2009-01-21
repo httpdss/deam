@@ -1,0 +1,10 @@
+<config>
+    <appsfile>externalapps.xml</appsfile>
+    <prefix>.</prefix>
+    <suffix>repo</suffix>
+    <repos>
+        <svn>svn</svn>
+        <git>git</git>
+        <hg>hg</hg>
+    </repos>
+</config>

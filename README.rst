@@ -11,9 +11,24 @@ Installation and Settings
 
 #. Download application from Github
 #. Make sure the application is under a django project or is added to the python path
-#. create a file inside the external apps folders you want to use and name it 'external.apps' this is the file where to set the different sources. The current format is *<application_name> <repository url> <repository type> <source/destination directory>*
+#. Edit config.xml for your needs
+#. Edit the appsfile you chose in config.xml, there is an example provided. 
+Format is the following: 
+<apps>
+    <app>
+        <name></name>
+        <url></url>
+        <repo_type></repo_type>
+        <directory></directory>
+    </app>
+    ...
+    ...
+</apps>
 #. execute 'python manage.py get_apps'
 
+New in 0.6
+==========
+- config.xml and externalapps.xml support
 
 New in 0.5
 ==========

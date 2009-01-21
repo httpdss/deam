@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
-import os, sys, subprocess, logging
+import os
+import sys
+import subprocess
+import logging
 import optparse
 
 from os.path import exists, join

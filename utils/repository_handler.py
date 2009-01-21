@@ -1,5 +1,9 @@
-import os, sys, subprocess, logging
+import os
+import sys
+import subprocess
+import logging
 
+from xml.dom import minidom
 from shutil import copytree, rmtree
 from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
@@ -20,20 +24,21 @@ File structure
 
 class InvalidFormatError(Exception):
     pass
-
 class RepositoryHandler(list):
     """
     This class represents the manager of external apps
     """
 
-    def __init__(self, location, external_apps_file, repository_directories):
+    def __init__(self, location, config):
         """
         Constructor.
         """
         list.__init__(self)
         self.location = location
-        self.external_apps_file = external_apps_file
-        self.repository_directories = repository_directories
+        self.external_apps_file = config['apps_file']
+        self.repos = config['repos']
+        self.repo_dir_prefix = config['prefix']
+        self.repo_dir_suffix = config['suffix']
         self.logger = logging.getLogger('repository_handler')
         self.logger.setLevel(logging.INFO)
         st = logging.StreamHandler()
@@ -50,7 +55,6 @@ class RepositoryHandler(list):
         """
         self.logger.info("Downloading apps...")
         for app in self:
-            print('Directory: %s' % app.directory)
             if lexists(join(self.location, app.directory)):
                 self._repo_update(app)
             else:
@@ -58,23 +62,22 @@ class RepositoryHandler(list):
         self.logger.info("Finished downloading apps")
 
     def _repo_create_prepare(self, vcs_type):
-        repo_dirs = join(self.location, self.repository_directories[vcs_type])
-        if not lexists(repo_dirs):
-            os.makedirs(repo_dirs)
-        os.chdir(repo_dirs)
+        repo_dir = join(self.location, self._get_repo_dir(vcs_type))
+        if not lexists(repo_dir):
+            os.makedirs(repo_dir)
+        os.chdir(repo_dir)
 
     def _repo_move(self, app):
-        app_dir = join(self.location, app.directory)
-        if lexists(app_dir):
-            rmtree(app_dir)
-        copytree(join(self.location, self.repository_directories[app.vcs_type], app.name, app.directory), app_dir)
+        repo_dir, app_dir = self._get_repo_dir(app.vcs_type), join(self.location, app.directory)
+        if lexists(app_dir): rmtree(app_dir)
+        copytree(join(self.location, repo_dir, app.name, app.directory),app_dir)
 
     def _repo_create_call(self, app):
-        if app.vcs_type == 'hg':
+        if app.vcs_type == self.repos['hg']:
             call(['hg', 'clone', app.url, app.name])
-        elif app.vcs_type == 'svn':
+        elif app.vcs_type == self.repos['svn']:
             call(['svn','co', app.url, app.name])
-        elif app.vcs_type == 'git':
+        elif app.vcs_type == self.repos['git']:
             call(['git', 'clone', app.url, app.name])
 
     def _repo_create(self, app):
@@ -85,15 +88,20 @@ class RepositoryHandler(list):
         self._repo_create_call(app)
         self._repo_move(app)
 
+    def _get_repo_dir(self, vcs_type):
+        return self.repo_dir_prefix + vcs_type + self.repo_dir_suffix
+
+
     def _repo_update_prepare(self, app):
-        os.chdir(join(self.location, self.repository_directories[app.vcs_type], app.name))
+        repo_dir = self._get_repo_dir(app.vcs_type)
+        os.chdir(join(self.location, repo_dir, app.name))
 
     def _repo_update_call(self, vcs_type):
-        if vcs_type == 'hg':
+        if vcs_type == self.repos['hg']:
             call(['hg', 'pull', '-u'])
-        if  vcs_type == 'svn':
+        if vcs_type == self.repos['svn']:
             call(['svn','update'])
-        elif vcs_type == 'git':
+        elif vcs_type == self.repos['git']:
             call(['git', 'pull'])
 
     def _repo_update(self, app):
@@ -108,22 +116,31 @@ class RepositoryHandler(list):
         """
         apps_file_path = join(self.location,self.external_apps_file)
         if lexists(apps_file_path):
-            infile = open(apps_file_path,'r')
-            for line in infile:
-                parts = line.split()
+            xmldoc = minidom.parse(apps_file_path)
+            name_list = xmldoc.getElementsByTagName('name')
+            url_list = xmldoc.getElementsByTagName('url')
+            repo_type_list = xmldoc.getElementsByTagName('repo_type')
+            directory_list = xmldoc.getElementsByTagName('directory')
+            for i, v in enumerate(name_list):
                 try:
-                    self.append(ExternalApp(parts[0],parts[1],parts[2], parts[3]))
-                except IndexError:#colocar el InvalidFormatError
+                    self.append(ExternalApp(
+                        name_list[i].childNodes[0].nodeValue,
+                        url_list[i].childNodes[0].nodeValue,
+                        repo_type_list[i].childNodes[0].nodeValue,
+                        directory_list[i].childNodes[0].nodeValue))
+                except IndexError:
                     print('%s format may be incorrect' % apps_file_path)
-            infile.close()
+                    continue
             if do_download:
                 self.download_apps()
         else:
             print "File does not exist"
+
     def list_apps(self):
         print "%s:" % self.location
         for app in self:
             print "\t%s\t%s" % (app.name,app.url)
+
 
 if __name__ == '__main__':
     rh = RepositoryHandler('/home/kenny/testing/a/','external.apps',REPO_DIRS)
