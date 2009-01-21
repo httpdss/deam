@@ -58,7 +58,8 @@ class AppsManager(object):
     def list_external_apps(self):
         for folder in self.app_folders:
             rh = RepositoryHandler(folder,self.config_path)
-            print rh.list_apps()
+            rh.execute(False)
+            rh.list_apps()
 
 def test_main():
     am = AppsManager(join(dirname(dirname(abspath(__file__))), 'testing'))
