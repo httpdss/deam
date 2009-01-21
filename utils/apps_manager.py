@@ -1,4 +1,7 @@
-import os, sys, subprocess, logging
+import os
+import sys
+import subprocess
+import logging
 
 from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
@@ -13,10 +16,15 @@ from deam.utils.wsgi_handler import WSGIHandler
 #TODO wsgi generator based on external.apps file location
 #TODO add libs support
 
-APPS_FILE = 'external.apps'
-REPO_DIRS = {'git': '.gitrepo',
-             'hg': '.hgrepo',
-             'svn': '.svnrepo',
+CONFIG = { 
+    'apps_file': 'external.apps', 
+    'prefix' : '.', 
+    'suffix': 'repo', 
+    'repos': {
+        'svn': 'svn', 
+        'git': 'git',
+        'hg': 'hg',
+    },
 }
 
 class AppsManager(object):
@@ -29,14 +37,14 @@ class AppsManager(object):
         Constructor.
         """
         self.base_path = base_path
-        self.app_folders = directory_for_file(self.base_path, APPS_FILE)
+        self.app_folders = directory_for_file(self.base_path, \
+        CONFIG['apps_file'])
 
     def execute(self):
         """
         """
         for folder in self.app_folders:
-            print(folder)
-            rh = RepositoryHandler(folder, APPS_FILE, REPO_DIRS)
+            rh = RepositoryHandler(folder, CONFIG)
             rh.execute()
 
     def generate_wsgi(self, settings_path):
@@ -47,7 +55,7 @@ class AppsManager(object):
 
     def list_external_apps(self):
         for folder in self.app_folders:
-            rh = RepositoryHandler(folder,APPS_FILE, REPO_DIRS)
+            rh = RepositoryHandler(folder, CONFIG)
             print rh.list_apps()
 
 def test_main():
