@@ -3,6 +3,7 @@ import sys
 import subprocess
 import logging
 
+from xml.dom import minidom
 from shutil import copytree, rmtree
 from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
@@ -108,16 +109,20 @@ class RepositoryHandler(list):
         """
         apps_file_path = join(self.location,self.external_apps_file)
         if lexists(apps_file_path):
-            infile = open(apps_file_path,'r')
-            for line in infile:
-                parts = line.split()
+            xmldoc = minidom.parse(apps_file_path)
+            name_list = xmldoc.getElementsByTagName('name')
+            url_list = xmldoc.getElementsByTagName('url')
+            repo_type_list = xmldoc.getElementsByTagName('repo_type') 
+            directory_list = xmldoc.getElementsByTagName('directory')            
+            for i, v in enumerate(name_list):
                 try:
-                    self.append(ExternalApp(parts[0],parts[1],parts[2], \
-                    parts[3]))
+                    self.append(ExternalApp(name_list[i].childNodes[0].\
+                    nodeValue, url_list[i].childNodes[0].nodeValue, \
+                    repo_type_list[i].childNodes[0].nodeValue, \
+                    directory_list[i].childNodes[0].nodeValue))
                 except IndexError:
                     print('%s format may be incorrect' % apps_file_path)
                     continue    
-            infile.close()
             if do_download:
                 self.download_apps()
         else:

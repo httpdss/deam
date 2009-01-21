@@ -1,5 +1,5 @@
 <config>
-    <appsfile>external.apps</appsfile>
+    <appsfile>externalapps.xml</appsfile>
     <prefix>.</prefix>
     <suffix>repo</suffix>
     <repos>
