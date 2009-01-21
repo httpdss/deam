@@ -8,14 +8,10 @@ from shutil import copytree, rmtree
 from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
 from string import split
-from deam.utils.utils import get_project_root, directory_for_file
+from deam.utils.utils import get_project_root, directory_for_file, get_config
 from deam.utils.external_app import ExternalApp
 from subprocess import call
 
-REPO_DIRS = {'git': '.gitrepo',
-             'hg': '.hgrepo',
-             'svn': '.svnrepo',
-}
 
 """
 File structure
@@ -29,11 +25,12 @@ class RepositoryHandler(list):
     This class represents the manager of external apps
     """
 
-    def __init__(self, location, config):
+    def __init__(self, location, config_path):
         """
         Constructor.
         """
-        list.__init__(self)
+        #list.__init__(self)
+        config = get_config(config_path)
         self.location = location
         self.external_apps_file = config['apps_file']
         self.repos = config['repos']
@@ -68,8 +65,10 @@ class RepositoryHandler(list):
         os.chdir(repo_dir)
 
     def _repo_move(self, app):
-        repo_dir, app_dir = self._get_repo_dir(app.vcs_type), join(self.location, app.directory)
-        if lexists(app_dir): rmtree(app_dir)
+        repo_dir = self._get_repo_dir(app.vcs_type) 
+        app_dir = join(self.location, app.directory)
+        if lexists(app_dir): 
+            rmtree(app_dir)
         copytree(join(self.location, repo_dir, app.name, app.directory),app_dir)
 
     def _repo_create_call(self, app):
@@ -115,26 +114,26 @@ class RepositoryHandler(list):
         """
         """
         apps_file_path = join(self.location,self.external_apps_file)
-        if lexists(apps_file_path):
-            xmldoc = minidom.parse(apps_file_path)
-            name_list = xmldoc.getElementsByTagName('name')
-            url_list = xmldoc.getElementsByTagName('url')
-            repo_type_list = xmldoc.getElementsByTagName('repo_type')
-            directory_list = xmldoc.getElementsByTagName('directory')
-            for i, v in enumerate(name_list):
-                try:
-                    self.append(ExternalApp(
-                        name_list[i].childNodes[0].nodeValue,
-                        url_list[i].childNodes[0].nodeValue,
-                        repo_type_list[i].childNodes[0].nodeValue,
-                        directory_list[i].childNodes[0].nodeValue))
-                except IndexError:
-                    print('%s format may be incorrect' % apps_file_path)
-                    continue
-            if do_download:
-                self.download_apps()
-        else:
-            print "File does not exist"
+        #if lexists(apps_file_path):
+        xmldoc = minidom.parse(apps_file_path)
+        name_list = xmldoc.getElementsByTagName('name')
+        url_list = xmldoc.getElementsByTagName('url')
+        repo_type_list = xmldoc.getElementsByTagName('type')
+        directory_list = xmldoc.getElementsByTagName('directory')
+        for i, v in enumerate(name_list):
+            try:
+                self.append(ExternalApp(
+                    name_list[i].childNodes[0].nodeValue,
+                    url_list[i].childNodes[0].nodeValue,
+                    repo_type_list[i].childNodes[0].nodeValue,
+                    directory_list[i].childNodes[0].nodeValue))
+            except IndexError:
+                raise DeamError('%s format may be incorrect' % apps_file_path)
+                continue
+        if do_download:
+            self.download_apps()
+        #else:
+         #   raise IOError, "File %s does not exist" % apps_file_path
 
     def list_apps(self):
         print "%s:" % self.location
@@ -143,7 +142,8 @@ class RepositoryHandler(list):
 
 
 if __name__ == '__main__':
-    rh = RepositoryHandler('/home/kenny/testing/a/','external.apps',REPO_DIRS)
+    deam_rel_root = dirname(dirname(abspath(__file__)))
+    rh = RepositoryHandler(join(deam_rel_root, 'testing'), deam_rel_root)
     rh.execute(False)
     rh.list_apps()
 

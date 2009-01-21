@@ -2,13 +2,13 @@
     <app>
         <name>basic</name>
         <url>http://django-basic-apps.googlecode.com/svn/trunk/</url>
-        <repo_type>svn</repo_type>
+        <type>svn</type>
         <directory>books</directory>
     </app>
     <app>
         <name>jellyroll</name>
         <url>git://github.com/jacobian/jellyroll.git</url>
-        <repo_type>git</repo_type>
+        <type>git</type>
         <directory>jellyroll</directory>
     </app>
 </apps>

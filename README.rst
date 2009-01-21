@@ -13,18 +13,22 @@ Installation and Settings
 #. Make sure the application is under a django project or is added to the python path
 #. Edit config.xml for your needs
 #. Edit the appsfile you chose in config.xml, there is an example provided. 
-Format is the following: 
-<apps>
-    <app>
-        <name></name>
-        <url></url>
-        <repo_type></repo_type>
-        <directory></directory>
-    </app>
-    ...
-    ...
-</apps>
+    Format is the following: 
+    <apps>
+        <app>
+            <name></name>
+            <url></url>
+            <repo_type></repo_type>
+            <directory></directory>
+        </app>
+        ...
+        ...
+    </apps>
 #. execute 'python manage.py get_apps'
+
+New in 0.6.1
+============
+- custom exceptions, code cleanup
 
 New in 0.6
 ==========
