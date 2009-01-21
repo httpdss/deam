@@ -12,6 +12,8 @@ from deam.utils.wsgi_handler import WSGIHandler
 #TODO alert the user to add the folders to the python path
 #TODO wsgi generator based on external.apps file location
 #TODO add libs support
+#TODO manage multiple subdirectories of a repository
+#TODO single app download/update
 
 APPS_FILE = 'external.apps'
 REPO_DIRS = {'git': '.gitrepo',

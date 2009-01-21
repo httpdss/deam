@@ -11,6 +11,8 @@ class ExternalApp(object):
         url -- url of repository
         folder -- project subfolder
         """
+
+        #TODO validate format and throw exceptions
         self._vcs_type = vcs_type
         self._url = url
         self._name = name
