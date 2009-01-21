@@ -24,7 +24,10 @@ class Command(BaseCommand):
         """
         external apps command handler
         """
-        self.apps_manager = AppsManager(get_project_root(), settings.DEAM_CONFIG)
+        DEAM_CONFIG = {}
+        if hasattr(settings, 'DEAM_CONFIG'):
+            DEAM_CONFIG = settings.DEAM_CONFIG
+        self.apps_manager = AppsManager(get_project_root(), DEAM_CONFIG)
         self.apps_manager.execute()
 
 # vim: ai ts=4 sts=4 et sw=4
