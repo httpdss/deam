@@ -25,17 +25,19 @@ class RepositoryHandler(list):
     This class represents the manager of external apps
     """
 
-    def __init__(self, location, config_path):
-        """
+    def __init__(self, location, config={}):
+        """"
         Constructor.
         """
         #list.__init__(self)
-        config = get_config(config_path)
+        configdef = get_config()
+        for k in config:
+            configdef[k] = config[k]
         self.location = location
-        self.external_apps_file = config['apps_file']
-        self.repos = config['repos']
-        self.repo_dir_prefix = config['prefix']
-        self.repo_dir_suffix = config['suffix']
+        self.external_apps_file = configdef['apps_file']
+        self.repos = configdef['repos']
+        self.repo_dir_prefix = configdef['prefix']
+        self.repo_dir_suffix = configdef['suffix']
         self.logger = logging.getLogger('repository_handler')
         self.logger.setLevel(logging.INFO)
         st = logging.StreamHandler()

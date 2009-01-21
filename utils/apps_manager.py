@@ -29,13 +29,16 @@ class AppsManager(object):
     """
     This class represents
     """
-    def __init__(self, base_path):
+    def __init__(self, base_path, config={}):
         """
         Constructor.
         """
+
         self.base_path = base_path
         self.config_path = dirname(dirname(abspath(__file__)))
-        self.config = get_config(self.config_path)
+        self.config = get_config()
+        for k in config:
+            self.config[k] = config[k]
         self.app_folders = directory_for_file(self.base_path, \
         self.config['apps_file'])
         if self.app_folders == []:
@@ -46,7 +49,7 @@ class AppsManager(object):
         """
         """
         for folder in self.app_folders:
-            rh = RepositoryHandler(folder, self.config_path)
+            rh = RepositoryHandler(folder, self.config)
             rh.execute()
 
     def generate_wsgi(self, settings_path):
@@ -57,7 +60,7 @@ class AppsManager(object):
 
     def list_external_apps(self):
         for folder in self.app_folders:
-            rh = RepositoryHandler(folder,self.config_path)
+            rh = RepositoryHandler(folder,self.config)
             rh.execute(False)
             rh.list_apps()
 
