@@ -11,9 +11,11 @@ Installation and Settings
 
 #. Download application from Github
 #. Make sure the application is under a django project or is added to the python path
-#. Edit config.xml for your needs
-#. Edit the appsfile you chose in config.xml, there is an example provided. 
-    Format is the following: 
+#. Edit your project's settings.py and add a DEAM_CONFIG dictionary if you dont like the defaults. You can override any default you want.
+#. Execute 'python manage.py get_apps'
+
+Format for the apps file::
+
     <apps>
         <app>
             <name></name>
@@ -24,7 +26,19 @@ Installation and Settings
         ...
         ...
     </apps>
-#. execute 'python manage.py get_apps'
+    
+Default DEAM_CONFIG::
+
+    DEAM_CONFIG = {
+        'apps_file': 'externalapps.xml',
+        'prefix': '.',
+        'suffix': 'repo',
+        'repos': { 
+            'svn': 'svn',
+            'hg': 'hg',
+            'git': 'git',
+            },  
+        }
 
 New in 0.6.1
 ============
