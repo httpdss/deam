@@ -10,7 +10,7 @@ from os import pathsep
 from string import split
 from deam.utils.utils import get_project_root, directory_for_file, get_config
 from deam.utils.external_app import ExternalApp
-from deam.utils.exceptions import IncorrectFormatError
+from deam.utils.exceptions import IncorrectFormatError, InvalidVCSTypeError
 from subprocess import call
 
 class RepositoryHandler(list):
@@ -66,7 +66,8 @@ class RepositoryHandler(list):
         app_dir = join(self.location, app.directory)
         if lexists(app_dir): 
             rmtree(app_dir)
-        copytree(join(self.location, repo_dir, app.name, app.directory),app_dir)
+        copytree(join(self.location, repo_dir, app.name, app.directory), \
+        app_dir)
 
     def _repo_create_call(self, app):
         if app.vcs_type == self.repos['hg']:
@@ -121,9 +122,11 @@ class RepositoryHandler(list):
         == len(directory_list)):
             raise IncorrectFormatError(apps_file_path)
         for i, v in enumerate(name_list):
+            vcs = repo_type_list[i].childNodes[0].nodeValue
+            if vcs not in self.repos:
+                raise InvalidVCSTypeError(vcs)
             self.append(ExternalApp(name_list[i].childNodes[0].nodeValue, \
-            url_list[i].childNodes[0].nodeValue, \
-            repo_type_list[i].childNodes[0].nodeValue, \
+            url_list[i].childNodes[0].nodeValue, vcs, \
             directory_list[i].childNodes[0].nodeValue))
         if do_download:
             self.download_apps()

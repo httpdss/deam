@@ -4,6 +4,12 @@ class Error(Exception):
 class IncorrectFormatError(Error):
     pass
 
+class InvalidVCSTypeError(Error):
+    def __init__(self, vcstype):
+        self.vcstype = vcstype
+    def __str__(self):
+        return repr('%s not found in configuration.' % self.vcstype)
+
 class NoAppsFileError(Error):
     def __init__(self, appfile, basedir):
         self.appfile = appfile
