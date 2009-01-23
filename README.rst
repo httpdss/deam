@@ -43,7 +43,7 @@ Default DEAM_CONFIG::
 
 New in 0.6.2
 ============
-- added alert support. If set to True, every time a repository is created for an application, deam will issue an alert, advising you to add the new app path to the python path.
+- added alert support. If set to True, every time a repository is created for an application, deam will issue an alert, advising you to add the new app path to the python path.˝
 
 New in 0.6.1
 ============
