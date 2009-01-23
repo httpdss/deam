@@ -33,12 +33,17 @@ Default DEAM_CONFIG::
         'apps_file': 'externalapps.xml',
         'prefix': '.',
         'suffix': 'repo',
+        'alert' : True,
         'repos': { 
             'svn': 'svn',
             'hg': 'hg',
             'git': 'git',
             },  
         }
+
+New in 0.6.2
+============
+- added alert support. If set to True, every time a repository is created for an application, deam will issue an alert, advising you to add the new app path to the python path.
 
 New in 0.6.1
 ============

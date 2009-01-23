@@ -12,14 +12,6 @@ from deam.utils.utils import get_project_root, directory_for_file, get_config
 from deam.utils.external_app import ExternalApp
 from subprocess import call
 
-
-"""
-File structure
-<application name> <repository url> <>
-"""
-
-class InvalidFormatError(Exception):
-    pass
 class RepositoryHandler(list):
     """
     This class represents the manager of external apps
@@ -29,7 +21,6 @@ class RepositoryHandler(list):
         """"
         Constructor.
         """
-        #list.__init__(self)
         configdef = get_config()
         for k in config:
             configdef[k] = config[k]
@@ -38,6 +29,7 @@ class RepositoryHandler(list):
         self.repos = configdef['repos']
         self.repo_dir_prefix = configdef['prefix']
         self.repo_dir_suffix = configdef['suffix']
+        self.alert = configdef['alert']
         self.logger = logging.getLogger('repository_handler')
         self.logger.setLevel(logging.INFO)
         st = logging.StreamHandler()
@@ -47,7 +39,7 @@ class RepositoryHandler(list):
     def show_alert(self):
         """
         """
-        print "remember to add the apps to the python path"
+        print "Remember to add this app to the python path."
 
     def download_apps(self):
         """
@@ -58,6 +50,8 @@ class RepositoryHandler(list):
                 self._repo_update(app)
             else:
                 self._repo_create(app)
+                if self.alert:
+                    self.show_alert()
         self.logger.info("Finished downloading apps")
 
     def _repo_create_prepare(self, vcs_type):
