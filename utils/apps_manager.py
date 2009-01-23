@@ -3,7 +3,7 @@ import sys
 import subprocess
 import logging
 
-from deam.utils.exceptions import DeamError
+from deam.utils.exceptions import NoAppsFileError
 from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
 from string import split
@@ -14,11 +14,8 @@ from deam.utils.repository_handler import RepositoryHandler
 from deam.utils.wsgi_handler import WSGIHandler
 
 """
-TODO alert the user to add the folders to the python path
 TODO wsgi generator based on external.apps file location
 TODO add libs support
-external.apps test location is 1 in utils/../testing (utils is where
-apps_manager.py is)
 TODO manage multiple subdirectories of a repository
 TODO single app download/update
 """
@@ -40,9 +37,8 @@ class AppsManager(object):
         self.app_folders = directory_for_file(self.base_path, \
         self.config['apps_file'])
         if self.app_folders == []:
-            raise DeamError("Could not find %s in the base path %s" % \
-            (self.config['apps_file'], self.base_path))
-        
+            raise NoAppsFileError(self.config['apps_file'], self.base_path)
+            
     def execute(self):
         """
         """

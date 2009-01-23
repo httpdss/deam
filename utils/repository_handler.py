@@ -10,6 +10,7 @@ from os import pathsep
 from string import split
 from deam.utils.utils import get_project_root, directory_for_file, get_config
 from deam.utils.external_app import ExternalApp
+from deam.utils.exceptions import IncorrectFormatError
 from subprocess import call
 
 class RepositoryHandler(list):
@@ -116,21 +117,17 @@ class RepositoryHandler(list):
         url_list = xmldoc.getElementsByTagName('url')
         repo_type_list = xmldoc.getElementsByTagName('type')
         directory_list = xmldoc.getElementsByTagName('directory')
+        if not (len(name_list) == len(url_list) == len(repo_type_list) \
+        == len(directory_list)):
+            raise IncorrectFormatError(apps_file_path)
         for i, v in enumerate(name_list):
-            try:
-                self.append(ExternalApp(
-                    name_list[i].childNodes[0].nodeValue,
-                    url_list[i].childNodes[0].nodeValue,
-                    repo_type_list[i].childNodes[0].nodeValue,
-                    directory_list[i].childNodes[0].nodeValue))
-            except IndexError:
-                raise DeamError('%s format may be incorrect' % apps_file_path)
-                continue
+            self.append(ExternalApp(name_list[i].childNodes[0].nodeValue, \
+            url_list[i].childNodes[0].nodeValue, \
+            repo_type_list[i].childNodes[0].nodeValue, \
+            directory_list[i].childNodes[0].nodeValue))
         if do_download:
             self.download_apps()
-        #else:
-         #   raise IOError, "File %s does not exist" % apps_file_path
-
+        
     def list_apps(self):
         print "%s:" % self.location
         for app in self:
