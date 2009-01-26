@@ -9,7 +9,7 @@ def get_config():
         'apps_file': 'externalapps.xml',
         'prefix': '.',
         'suffix': 'repo',
-        'repos': { 
+        'repos': {
             'svn': 'svn',
             'hg': 'hg',
             'git': 'git',
