@@ -25,7 +25,7 @@ class AppsManager(object):
     """
     This class represents
     """
-    def __init__(self, base_path, config={}):
+    def __init__(self, base_path, config={}, single=''):
         """
         Constructor.
         """
@@ -35,8 +35,11 @@ class AppsManager(object):
         self.config = get_config()
         for k in config:
             self.config[k] = config[k]
-        self.app_folders = directory_for_file(self.base_path, \
-        self.config['apps_file'])
+        self.app_folders = directory_for_file(
+            self.base_path,
+            self.config['apps_file']
+        )
+        self.config['single'] = single
         if self.app_folders == []:
             raise NoAppsFileError(self.config['apps_file'], self.base_path)
             
