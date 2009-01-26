@@ -11,20 +11,39 @@ Installation and Settings
 
 #. Download application from Github
 #. Make sure the application is under a django project or is added to the python path
-#. Edit config.xml for your needs
-#. Edit the appsfile you chose in config.xml, there is an example provided. 
-    Format is the following: 
-    <apps>
-        <app>
-            <name></name>
-            <url></url>
-            <repo_type></repo_type>
-            <directory></directory>
-        </app>
-        ...
-        ...
-    </apps>
-#. execute 'python manage.py get_apps'
+#. Edit your project's settings.py and add a DEAM_CONFIG dictionary if you dont like the defaults. You can override any default you want.
+#. Execute 'python manage.py get_apps'
+
+Format for the apps file::
+
+    [name]
+    url: project url
+    type: vcs type
+    directory: directory wanted
+    
+    ...
+    
+    [other name]
+    ...
+    ...
+    
+Default DEAM_CONFIG::
+
+    DEAM_CONFIG = {
+        'apps_file': 'externalapps.xml',
+        'prefix': '.',
+        'suffix': 'repo',
+        'alert' : True,
+        'repos': { 
+            'svn': 'svn',
+            'hg': 'hg',
+            'git': 'git',
+            },  
+        }
+
+New in 0.6.2
+============
+- added alert support. If set to True, every time a repository is created for an application, deam will issue an alert, advising you to add the new app path to the python path.˝
 
 New in 0.6.1
 ============

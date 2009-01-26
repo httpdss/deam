@@ -3,23 +3,16 @@ import sys
 import subprocess
 import logging
 
-from xml.dom import minidom
 from shutil import copytree, rmtree
 from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
 from string import split
-from deam.utils.utils import get_project_root, directory_for_file, get_config
+from deam.utils.utils import get_project_root, directory_for_file, \
+get_config, parse_apps_file
 from deam.utils.external_app import ExternalApp
+from deam.utils.exceptions import InvalidVCSTypeError
 from subprocess import call
 
-
-"""
-File structure
-<application name> <repository url> <>
-"""
-
-class InvalidFormatError(Exception):
-    pass
 class RepositoryHandler(list):
     """
     This class represents the manager of external apps
@@ -29,7 +22,6 @@ class RepositoryHandler(list):
         """"
         Constructor.
         """
-        #list.__init__(self)
         configdef = get_config()
         for k in config:
             configdef[k] = config[k]
@@ -38,6 +30,7 @@ class RepositoryHandler(list):
         self.repos = configdef['repos']
         self.repo_dir_prefix = configdef['prefix']
         self.repo_dir_suffix = configdef['suffix']
+        self.alert = configdef['alert']
         self.logger = logging.getLogger('repository_handler')
         self.logger.setLevel(logging.INFO)
         st = logging.StreamHandler()
@@ -47,7 +40,7 @@ class RepositoryHandler(list):
     def show_alert(self):
         """
         """
-        print "remember to add the apps to the python path"
+        print "Remember to add this app to the python path."
 
     def download_apps(self):
         """
@@ -58,6 +51,8 @@ class RepositoryHandler(list):
                 self._repo_update(app)
             else:
                 self._repo_create(app)
+                if self.alert:
+                    self.show_alert()
         self.logger.info("Finished downloading apps")
 
     def _repo_create_prepare(self, vcs_type):
@@ -71,7 +66,8 @@ class RepositoryHandler(list):
         app_dir = join(self.location, app.directory)
         if lexists(app_dir): 
             rmtree(app_dir)
-        copytree(join(self.location, repo_dir, app.name, app.directory),app_dir)
+        copytree(join(self.location, repo_dir, app.name, app.directory), \
+        app_dir)
 
     def _repo_create_call(self, app):
         if app.vcs_type == self.repos['hg']:
@@ -116,27 +112,19 @@ class RepositoryHandler(list):
         """
         """
         apps_file_path = join(self.location,self.external_apps_file)
-        #if lexists(apps_file_path):
-        xmldoc = minidom.parse(apps_file_path)
-        name_list = xmldoc.getElementsByTagName('name')
-        url_list = xmldoc.getElementsByTagName('url')
-        repo_type_list = xmldoc.getElementsByTagName('type')
-        directory_list = xmldoc.getElementsByTagName('directory')
-        for i, v in enumerate(name_list):
-            try:
-                self.append(ExternalApp(
-                    name_list[i].childNodes[0].nodeValue,
-                    url_list[i].childNodes[0].nodeValue,
-                    repo_type_list[i].childNodes[0].nodeValue,
-                    directory_list[i].childNodes[0].nodeValue))
-            except IndexError:
-                raise DeamError('%s format may be incorrect' % apps_file_path)
-                continue
+        parse = parse_apps_file(apps_file_path)
+        for v in parse:
+            if v['type'] not in self.repos:
+                raise InvalidVCSTypeError(v['type'])
+            self.append(ExternalApp(
+                v['name'],
+                v['url'],
+                v['type'],
+                v['directory']
+            ))
         if do_download:
             self.download_apps()
-        #else:
-         #   raise IOError, "File %s does not exist" % apps_file_path
-
+        
     def list_apps(self):
         print "%s:" % self.location
         for app in self:
@@ -145,7 +133,7 @@ class RepositoryHandler(list):
 
 if __name__ == '__main__':
     deam_rel_root = dirname(dirname(abspath(__file__)))
-    rh = RepositoryHandler(join(deam_rel_root, 'testing'), deam_rel_root)
+    rh = RepositoryHandler(join(deam_rel_root, 'testing'))
     rh.execute(False)
     rh.list_apps()
 

@@ -1,0 +1,9 @@
+[basic]
+url: http://django-basic-apps.googlecode.com/svn/trunk/
+type: svn
+directory: books
+
+[jellyroll]
+url: git://github.com/jacobian/jellyroll.git
+type: git
+directory: jellyroll
