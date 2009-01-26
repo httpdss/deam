@@ -17,7 +17,6 @@ from deam.utils.wsgi_handler import WSGIHandler
 TODO wsgi generator based on external.apps file location
 TODO add libs support
 TODO manage multiple subdirectories of a repository
-TODO single app download/update
 TODO after app update, only copy if app has been updated
 """
 
