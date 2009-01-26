@@ -17,7 +17,6 @@ from deam.utils.wsgi_handler import WSGIHandler
 TODO wsgi generator based on external.apps file location
 TODO add libs support
 TODO manage multiple subdirectories of a repository
-TODO single app download/update
 TODO after app update, only copy if app has been updated
 """
 
@@ -25,7 +24,7 @@ class AppsManager(object):
     """
     This class represents
     """
-    def __init__(self, base_path, config={}):
+    def __init__(self, base_path, config={}, single=''):
         """
         Constructor.
         """
@@ -35,8 +34,11 @@ class AppsManager(object):
         self.config = get_config()
         for k in config:
             self.config[k] = config[k]
-        self.app_folders = directory_for_file(self.base_path, \
-        self.config['apps_file'])
+        self.app_folders = directory_for_file(
+            self.base_path,
+            self.config['apps_file']
+        )
+        self.config['single'] = single
         if self.app_folders == []:
             raise NoAppsFileError(self.config['apps_file'], self.base_path)
             

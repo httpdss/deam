@@ -3,7 +3,7 @@ class ExternalApp(object):
     This class represents representation of external application
     """
 
-    def __init__(self, name, url, vcs_type='svn', directory=''):
+    def __init__(self, val_dict):
         """
         Constructor.
         vcs_type -- type of the version control system. possible
@@ -13,10 +13,10 @@ class ExternalApp(object):
         """
 
         #TODO validate format and throw exceptions
-        self._vcs_type = vcs_type
-        self._url = url
-        self._name = name
-        self._directory = directory
+        self._vcs_type = val_dict['type']
+        self._url = val_dict['url']
+        self._name = val_dict['name']
+        self._directory = val_dict['directory']
 
     def get_vcs_type(self):
         return self._vcs_type
