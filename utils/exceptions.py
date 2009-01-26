@@ -1,9 +1,6 @@
 class Error(Exception):
     pass
 
-class IncorrectFormatError(Error):
-    pass
-
 class InvalidVCSTypeError(Error):
     def __init__(self, vcstype):
         self.vcstype = vcstype

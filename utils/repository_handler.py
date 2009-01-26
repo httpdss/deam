@@ -3,14 +3,14 @@ import sys
 import subprocess
 import logging
 
-from xml.dom import minidom
 from shutil import copytree, rmtree
 from os.path import exists, join, abspath, dirname, lexists
 from os import pathsep
 from string import split
-from deam.utils.utils import get_project_root, directory_for_file, get_config
+from deam.utils.utils import get_project_root, directory_for_file, \
+get_config, parse_apps_file
 from deam.utils.external_app import ExternalApp
-from deam.utils.exceptions import IncorrectFormatError, InvalidVCSTypeError
+from deam.utils.exceptions import InvalidVCSTypeError
 from subprocess import call
 
 class RepositoryHandler(list):
@@ -112,22 +112,16 @@ class RepositoryHandler(list):
         """
         """
         apps_file_path = join(self.location,self.external_apps_file)
-        #if lexists(apps_file_path):
-        xmldoc = minidom.parse(apps_file_path)
-        name_list = xmldoc.getElementsByTagName('name')
-        url_list = xmldoc.getElementsByTagName('url')
-        repo_type_list = xmldoc.getElementsByTagName('type')
-        directory_list = xmldoc.getElementsByTagName('directory')
-        if not (len(name_list) == len(url_list) == len(repo_type_list) \
-        == len(directory_list)):
-            raise IncorrectFormatError(apps_file_path)
-        for i, v in enumerate(name_list):
-            vcs = repo_type_list[i].childNodes[0].nodeValue
-            if vcs not in self.repos:
-                raise InvalidVCSTypeError(vcs)
-            self.append(ExternalApp(name_list[i].childNodes[0].nodeValue, \
-            url_list[i].childNodes[0].nodeValue, vcs, \
-            directory_list[i].childNodes[0].nodeValue))
+        parse = parse_apps_file(apps_file_path)
+        for v in parse:
+            if v['type'] not in self.repos:
+                raise InvalidVCSTypeError(v['type'])
+            self.append(ExternalApp(
+                v['name'],
+                v['url'],
+                v['type'],
+                v['directory']
+            ))
         if do_download:
             self.download_apps()
         
@@ -139,7 +133,7 @@ class RepositoryHandler(list):
 
 if __name__ == '__main__':
     deam_rel_root = dirname(dirname(abspath(__file__)))
-    rh = RepositoryHandler(join(deam_rel_root, 'testing'), deam_rel_root)
+    rh = RepositoryHandler(join(deam_rel_root, 'testing'))
     rh.execute(False)
     rh.list_apps()
 

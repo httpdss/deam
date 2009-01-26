@@ -16,16 +16,16 @@ Installation and Settings
 
 Format for the apps file::
 
-    <apps>
-        <app>
-            <name></name>
-            <url></url>
-            <repo_type></repo_type>
-            <directory></directory>
-        </app>
-        ...
-        ...
-    </apps>
+    [name]
+    url: project url
+    type: vcs type
+    directory: directory wanted
+    
+    ...
+    
+    [other name]
+    ...
+    ...
     
 Default DEAM_CONFIG::
 
