@@ -6,73 +6,33 @@ DEAM (Django External Apps Manager)
 
 This project is focused on resolving the recurring problem of managing external apps when working with django projects by taking a different approach: custom commands.
 
-Installation and Settings
-=========================
+Installation
+============
 
-#. Download application from Github
-#. Make sure the application is under a django project or is added to the python path
-#. Edit your project's settings.py and add a DEAM_CONFIG dictionary if you dont like the defaults. You can override any default you want.
-#. Execute 'python manage.py get_apps'
+#. Download DEAM from Github
+#. Add DEAM to your python path and to the INSTALLED_APPS on your project
+
+Setting Up
+==========
+
+The first step is to choose in which folder you will have your external applications. This folders will have to include a file called ***external.apps*** with the following file format:
 
 Format for the apps file::
 
-    [name]
+    [app_name]
     url: project url
     type: vcs type
     directory: directory wanted
     
     ...
     
-    [other name]
+    [other app_name]
     ...
     ...
+
+After correctly setting the external.apps files on your different folders, you can now execute this commands from your project root:
+#. Download or update a single application: python manage.py get_apps [app_name]
+#. List all external applications: python manage.py -l
+#. Download or update all applications: python manage.py -a
     
-Default DEAM_CONFIG::
 
-    DEAM_CONFIG = {
-        'apps_file': 'externalapps.xml',
-        'prefix': '.',
-        'suffix': 'repo',
-        'alert' : True,
-        'repos': { 
-            'svn': 'svn',
-            'hg': 'hg',
-            'git': 'git',
-            },  
-        }
-
-New in 0.6.2
-============
-- added alert support. If set to True, every time a repository is created for an application, deam will issue an alert, advising you to add the new app path to the python path.˝
-
-New in 0.6.1
-============
-- custom exceptions, code cleanup
-
-New in 0.6
-==========
-- config.xml and externalapps.xml support
-
-New in 0.5
-==========
-- sub directory support
-
-New in 0.4
-==========
-- mercurial support
-- git support
-- generalized download/update functions
-- internal testing
-
-New in 0.3
-==========
-- name change
-
-New in 0.2
-==========
-- wsgi generator (under development)
-
-New in 0.1
-==========
-- svn checkout
-- folder scanning for the external.apps file
