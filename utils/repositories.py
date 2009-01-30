@@ -1,35 +1,218 @@
+import os
 from subprocess import call
-from deam.utils.base_repository import BaseRepository
+from os.path import join, lexists
+from distutils.dir_util import copy_tree
+
+class BaseRepository(object):
+    """
+    This class represents representation of external application
+    """
+
+    def __init__(self, val_dict):
+        """
+        Constructor.
+        vcs_type -- type of the version control system. possible
+                    values: svn, git and hg
+        url -- url of repository
+        folder -- project subfolder
+        """
+
+        #TODO validate format and throw exceptions
+         #   if config.get(sec,'type') not in self.config['repos']:
+         #       raise InvalidVCSTypeError(app['type'])
+        self._vcs_type = val_dict['type']
+        self._url = val_dict['url']
+        self._name = val_dict['name']
+        self._directory = val_dict['directory']
+        self._location = val_dict['location']
+        self._alert = val_dict.get('alert') or False
+
+    def __cmp__(self, other):
+        """compare by application name"""
+        return cmp(self.name, other.name)
+
+    def __unicode__(self):
+        return "%s - %s" % (self._name, self._url)
+
+    def get_absolute_directory(self):
+        return join(self.location, self.directory)
+
+    def is_created(self):
+        return lexists(self.get_absolute_directory())
+
+    def download_or_update(self):
+        if self.is_created():
+            self.update()
+        else:
+            self.create()
+
+    def show_alert(self):
+        print "Remember to add this app to the python path."
+
+    @property
+    def vcs_type(self):
+        return self._vcs_type
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def directory(self):
+        return self._directory
+
+    @property
+    def url(self):
+        return self._url
+
+    @property
+    def location(self):
+        return self._location
+
+    @property
+    def alert(self):
+        return self._alert
+
 
 
 class SvnRepo(BaseRepository):
 
     def update(self):
+        """
+        Main function for repository update
+        """
 
+        #go to app hidden directory
+        os.chdir(self.__get_hidden_dir())
+        #execute update command inside app directory
         call(['svn','update'])
+        #copy the desired subfolder from hidden to the app directory
+        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(),update=1)
 
     def create(self):
-        
-        call(['svn','co', self.url, self.name])
+        """
+        Main function for repository create
+        """
+        #create the hidden root
+        if not self._is_hidden_root_created():
+            os.makedirs(self.__get_hidden_root())
 
+        #get the remote app from repository
+        os.chdir(self.__get_hidden_root())
+        call(['svn','co', self.url, self.name])
+        #copy the desired subfolder from hidden to the app directory
+        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory())
+
+    def __get_hidden_subfolder(self):
+        return join(self.__get_hidden_dir(), self.directory)
+
+    def __is_hidden_dir_created(self):
+        return lexists(self.__get_absolute_hidden_directory())
+
+    def __get_hidden_dir(self):
+        return join (self.__get_hidden_root(), self.name)
+
+    def __is_hidden_root_created(self):
+        return lexists(self.__get_hidden_root())
+
+    def __get_hidden_root(self):
+        return join(self.location, '.svn_repository')
 
 class GitRepo(BaseRepository):
 
-    def update(self):
-
-        call(['git', 'pull'])
-
     def create(self):
-        
-        call(['git', 'clone', self.url, self.name])
+        """
+        Main function for repository create
+        """
+        #create the hidden root
+        if not self._is_hidden_root_created():
+            os.makedirs(self.__get_hidden_root())
 
+        #get the remote app from repository
+        os.chdir(self.__get_hidden_root())
+        call(['git', 'clone', self.url, self.name])
+        #copy the desired subfolder from hidden to the app directory
+        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory())
+
+    def update(self):
+        """
+        Main function for repository update
+        """
+
+        #go to app hidden directory
+        os.chdir(self._get_hidden_dir())
+        #execute update command inside app directory
+        call(['git', 'pull'])
+        #copy the desired subfolder from hidden to the app directory
+        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(),update=1)
+
+    def __get_hidden_subfolder(self):
+        return join(self.__get_hidden_dir(), self.directory)
+
+    def __is_hidden_dir_created(self):
+        return lexists(self.__get_absolute_hidden_directory())
+
+    def __get_hidden_dir(self):
+        return join (self.__get_hidden_root(), self.name)
+
+    def __is_hidden_root_created(self):
+        return lexists(self.__get_hidden_root())
+
+    def __get_hidden_root(self):
+        """ get the repository directory depending on vcs type """
+        return join(self.location, '.git_repository')
 
 class HgRepo(BaseRepository):
-    
-    def update(self):
 
-        call(['hg', 'pull', '-u'])
 
     def create(self):
-        print 'entro?'
+        """
+        Main function for repository create
+        """
+        #create the hidden root
+        if not self._is_hidden_root_created():
+            os.makedirs(self.__get_hidden_root())
+
+        #get the remote app from repository
+        os.chdir(self._get_hidden_root())
         call(['hg', 'clone', self.url, self.name])
+        #copy the desired subfolder from hidden to the app directory
+        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory())
+
+    def update(self):
+        """
+        Main function for repository update
+        """
+
+        #go to app hidden directory
+        os.chdir(self.__get_hidden_dir())
+        #execute update command inside app directory
+        call(['hg', 'pull', '-u'])
+        #copy the desired subfolder from hidden to the app directory
+        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(),update=1)
+
+    def __get_hidden_subfolder(self):
+        return join(self.__get_hidden_dir(), self.directory)
+
+    def __is_hidden_dir_created(self):
+        return lexists(self.__get_absolute_hidden_directory())
+
+    def __get_hidden_dir(self):
+        return join (self.__get_hidden_root(), self.name)
+
+    def __is_hidden_root_created(self):
+        return lexists(self.__get_hidden_root())
+
+    def __get_hidden_root(self):
+        """ get the repository directory depending on vcs type """
+        return join(self.location, '.hg_repository')
+
+if __name__ == '__main__':
+    ea = SvnRepo({
+        'name' : 'pepe',
+        'url': 'http://django-command-extensions.googlecode.com/svn/trunk/',
+        'type': 'svn',
+        'directory' : 'django_extensions',
+        'location' : '/home/kenny/testing/'
+        })
+    ea.download_or_update()
