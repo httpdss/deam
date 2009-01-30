@@ -1,11 +1,10 @@
 import os
 import sys
 from os.path import exists, join, abspath, dirname, lexists
-from subprocess import call
 from distutils.dir_util import copy_tree, remove_tree
 import ConfigParser
 
-class ExternalApp(object):
+class BaseRepository(object):
     """
     This class represents representation of external application
     """
@@ -33,6 +32,12 @@ class ExternalApp(object):
         """compare by application name"""
         return cmp(self.name, other.name)
 
+    def create(self):
+        pass
+    
+    def update(self):
+        pass
+        
     def __unicode__(self):
         return "%s - %s" % (self._name, self._url)
 
@@ -91,20 +96,13 @@ class ExternalApp(object):
         """
         Main function for repository create
         """
-
         #create the hidden root
         if not self._is_hidden_root_created():
             os.makedirs(self._get_hidden_root())
 
         #get the remote app from repository
         os.chdir(self._get_hidden_root())
-        if self.vcs_type == 'hg':
-            call(['hg', 'clone', self.url, self.name])
-        elif self.vcs_type == 'svn':
-            call(['svn','co', self.url, self.name])
-        elif self.vcs_type == 'git':
-            call(['git', 'clone', self.url, self.name])
-
+        self.create()
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self._get_hidden_subfolder(), self.get_absolute_directory())
 
@@ -115,15 +113,8 @@ class ExternalApp(object):
 
         #go to app hidden directory
         os.chdir(self._get_hidden_dir())
-
         #execute update command inside app directory
-        if self.vcs_type == 'hg':
-            call(['hg', 'pull', '-u'])
-        elif self.vcs_type == 'svn':
-            call(['svn','update'])
-        elif self.vcs_type == 'git':
-            call(['git', 'pull'])
-
+        self.update()
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self._get_hidden_subfolder(), self.get_absolute_directory(),update=1)
 

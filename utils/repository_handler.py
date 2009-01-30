@@ -1,6 +1,6 @@
 import logging
 
-from deam.utils.external_app import ExternalApp
+from deam.utils.repositories import GitRepo, SvnRepo, HgRepo
 from deam.utils.config_handler import ConfigHandler
 
 
@@ -35,7 +35,14 @@ class RepositoryHandler(list):
         """ Parse the apps file and load each application to the list """
         cfg = ConfigHandler(self.location)
         for app_values in cfg.parse_apps_file():
-            self.append(ExternalApp(app_values))
+            repo = None
+            if app_values['type'] == 'hg':
+                repo = HgRepo(app_values)
+            elif app_values['type'] == 'svn':
+                repo = SvnRepo(app_values)
+            elif app_values['type'] == 'git':
+                repo = GitRepo(app_values)
+            self.append(repo)
 
     def list_apps(self):
         print "%s:" % self.location

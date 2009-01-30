@@ -43,8 +43,9 @@ class AppsManager(object):
         the RepositoryHandler for it.
         """
 
-        #TODO: check if app_name exists and thow error if it is not found
-
+        #TODO: check if app_name exists and throw error if it is not found
+        #missing single app download implementation?
+        
         for rh in self.repositories:
             rh.download_apps(app_name)
 
