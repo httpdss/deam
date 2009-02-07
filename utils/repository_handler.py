@@ -2,6 +2,7 @@ import logging
 
 from deam.utils.repositories import GitRepo, SvnRepo, HgRepo
 from deam.utils.config_handler import ConfigHandler
+from deam.utils.utils import detect_type
 
 
 class RepositoryHandler(list):
@@ -36,11 +37,12 @@ class RepositoryHandler(list):
         cfg = ConfigHandler(self.location)
         for app_values in cfg.parse_apps_file():
             repo = None
-            if app_values['type'] == 'hg':
+            app_type = app_values.get('type') or detect_type(app_values.get('url'))
+            if app_type == 'hg':
                 repo = HgRepo(app_values)
-            elif app_values['type'] == 'svn':
+            elif app_type == 'svn':
                 repo = SvnRepo(app_values)
-            elif app_values['type'] == 'git':
+            elif app_type == 'git':
                 repo = GitRepo(app_values)
             self.append(repo)
 

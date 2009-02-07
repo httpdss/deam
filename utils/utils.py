@@ -1,5 +1,4 @@
 from django.conf import settings
-from os.path import join, abspath, dirname
 import os
 
 def get_project_root():
@@ -19,4 +18,19 @@ def directory_for_file(dir_name, file_name):
         elif os.path.isdir(dirfile):
             fileList.extend(directory_for_file(dirfile,file_name))
     return fileList
+
+def detect_type(url):
+    """
+    method that tries to infer which is the type of the respository
+    
+    url -- url of repository
+    """
+    if 'svn' in url:
+        return 'svn'
+    elif 'git' in url:
+        return 'git'
+    elif 'hg' in url:
+        return 'hg'
+    else:
+        return False
 # vim: ai ts=4 sts=4 et sw=4

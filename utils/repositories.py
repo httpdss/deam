@@ -2,9 +2,11 @@ import os
 from subprocess import call
 from os.path import join, lexists
 from distutils.dir_util import copy_tree
+from deam.utils.utils import detect_type
 
 #TODO manage externals of svn repositories
 #TODO manage git submodules
+
 
 class BaseRepository(object):
     """
@@ -23,7 +25,7 @@ class BaseRepository(object):
         #TODO validate format and throw exceptions
          #   if config.get(sec,'type') not in self.config['repos']:
          #       raise InvalidVCSTypeError(app['type'])
-        self._vcs_type = val_dict['type']
+        self._vcs_type = val_dict.get('type') or detect_type(val_dict.get('url'))
         self._url = val_dict['url']
         self._name = val_dict['name']
         self._directory = val_dict.get('directory') or ''
@@ -77,7 +79,6 @@ class BaseRepository(object):
         return self._alert
 
 
-
 class SvnRepo(BaseRepository):
 
     def update(self):
@@ -97,11 +98,9 @@ class SvnRepo(BaseRepository):
         Main function for repository create
         """
         #create the hidden root
-        print "going to create"
         if not self.__is_hidden_root_created():
             os.makedirs(self.__get_hidden_root())
 
-        print "made private dir"
         #get the remote app from repository
         os.chdir(self.__get_hidden_root())
         call(['svn','co', self.url, self.name])
@@ -145,7 +144,7 @@ class GitRepo(BaseRepository):
         """
 
         #go to app hidden directory
-        os.chdir(self._get_hidden_dir())
+        os.chdir(self.__get_hidden_dir())
         #execute update command inside app directory
         call(['git', 'pull'])
         #copy the desired subfolder from hidden to the app directory
@@ -179,7 +178,7 @@ class HgRepo(BaseRepository):
             os.makedirs(self.__get_hidden_root())
 
         #get the remote app from repository
-        os.chdir(self._get_hidden_root())
+        os.chdir(self.__get_hidden_root())
         call(['hg', 'clone', self.url, self.name])
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory())
