@@ -3,6 +3,9 @@ from subprocess import call
 from os.path import join, lexists
 from distutils.dir_util import copy_tree
 
+#TODO manage externals of svn repositories
+#TODO manage git submodules
+
 class BaseRepository(object):
     """
     This class represents representation of external application
@@ -23,7 +26,7 @@ class BaseRepository(object):
         self._vcs_type = val_dict['type']
         self._url = val_dict['url']
         self._name = val_dict['name']
-        self._directory = val_dict['directory']
+        self._directory = val_dict.get('directory') or ''
         self._location = val_dict['location']
         self._alert = val_dict.get('alert') or False
 
@@ -35,7 +38,7 @@ class BaseRepository(object):
         return "%s - %s" % (self._name, self._url)
 
     def get_absolute_directory(self):
-        return join(self.location, self.directory)
+        return join(self.location, self.directory or self.name)
 
     def is_created(self):
         return lexists(self.get_absolute_directory())
@@ -87,16 +90,18 @@ class SvnRepo(BaseRepository):
         #execute update command inside app directory
         call(['svn','update'])
         #copy the desired subfolder from hidden to the app directory
-        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(),update=1)
+        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(), update=1)
 
     def create(self):
         """
         Main function for repository create
         """
         #create the hidden root
-        if not self._is_hidden_root_created():
+        print "going to create"
+        if not self.__is_hidden_root_created():
             os.makedirs(self.__get_hidden_root())
 
+        print "made private dir"
         #get the remote app from repository
         os.chdir(self.__get_hidden_root())
         call(['svn','co', self.url, self.name])
@@ -125,7 +130,7 @@ class GitRepo(BaseRepository):
         Main function for repository create
         """
         #create the hidden root
-        if not self._is_hidden_root_created():
+        if not self.__is_hidden_root_created():
             os.makedirs(self.__get_hidden_root())
 
         #get the remote app from repository
@@ -170,7 +175,7 @@ class HgRepo(BaseRepository):
         Main function for repository create
         """
         #create the hidden root
-        if not self._is_hidden_root_created():
+        if not self.__is_hidden_root_created():
             os.makedirs(self.__get_hidden_root())
 
         #get the remote app from repository

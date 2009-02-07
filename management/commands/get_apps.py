@@ -17,6 +17,12 @@ class Command(BaseCommand):
             dest='get_all_apps',
             help='Download all external applications'),
         make_option(
+            '-s',
+            '--show-details',
+            action="store_true",
+            dest='show_details',
+            help='Show details for the specified application'),
+        make_option(
             '-l',
             '--list-apps',
             action="store_true",
@@ -26,7 +32,7 @@ class Command(BaseCommand):
 
     help = 'Download all external apps defined for your django project'
 
-    args="[external_appname ...]"
+    args="[external_appname]"
 
     def handle(self, app_name='', *args, **options):
         """
@@ -50,5 +56,7 @@ class Command(BaseCommand):
             apps_manager.download_app()
         elif list_apps:
             apps_manager.list_external_apps()
+        else:
+            print "Missing params"
 
 # vim: ai ts=4 sts=4 et sw=4
