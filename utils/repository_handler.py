@@ -24,13 +24,11 @@ class RepositoryHandler(list):
     def download_apps(self, app_name=''):
         """
         """
-        self.logger.info("Downloading apps...")
         for app in self:
             if app_name and app_name == app.name:
                 app.download_or_update()
             elif not app_name:
                 app.download_or_update()
-        self.logger.info("Finished downloading apps")
 
     def load_apps(self):
         """ Parse the apps file and load each application to the list """
