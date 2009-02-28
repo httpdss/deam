@@ -47,9 +47,11 @@ class BaseRepository(object):
 
     def download_or_update(self):
         if self.is_created():
+            print "Updating: %s" % self.name
             self.update()
         else:
-            self.create()
+            print "Downloading: %s" % self.name
+            self.download()
 
     def show_alert(self):
         print "Remember to add this app to the python path."
@@ -93,7 +95,7 @@ class SvnRepo(BaseRepository):
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(), update=1)
 
-    def create(self):
+    def download(self):
         """
         Main function for repository create
         """
@@ -124,7 +126,7 @@ class SvnRepo(BaseRepository):
 
 class GitRepo(BaseRepository):
 
-    def create(self):
+    def download(self):
         """
         Main function for repository create
         """
@@ -169,7 +171,7 @@ class GitRepo(BaseRepository):
 class HgRepo(BaseRepository):
 
 
-    def create(self):
+    def download(self):
         """
         Main function for repository create
         """
