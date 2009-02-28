@@ -56,7 +56,7 @@ class Command(BaseCommand):
             apps_manager.download_app()
         elif list_apps:
             apps_manager.list_external_apps()
-        else:
+        elif not app_name:
             print "Missing params"
 
 # vim: ai ts=4 sts=4 et sw=4
