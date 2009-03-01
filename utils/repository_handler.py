@@ -1,7 +1,7 @@
 import logging
 
 from deam.utils.config_handler import ConfigHandler
-from deam.utils.repositories import GitApplication, SvnApplication, HgApplication
+from deam.utils.repositories import GitApplication, SvnApplication, HgApplication, SingleFileApplication
 from deam.utils.utils import detect_type, TermColors
 
 
