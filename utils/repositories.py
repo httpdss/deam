@@ -7,8 +7,9 @@ from deam.utils.utils import detect_type
 #TODO manage externals of svn repositories
 #TODO manage git submodules
 
+#TODO easy_install support (easy_install -d <destination_directory> <package_name>)
 
-class BaseRepository(object):
+class BaseApplication(object):
     """
     This class represents representation of external application
     """
@@ -25,12 +26,12 @@ class BaseRepository(object):
         #TODO validate format and throw exceptions
          #   if config.get(sec,'type') not in self.config['repos']:
          #       raise InvalidVCSTypeError(app['type'])
-        self._vcs_type = val_dict.get('type') or detect_type(val_dict.get('url'))
-        self._url = val_dict['url']
-        self._name = val_dict['name']
+        self._alert = val_dict.get('alert') or False
         self._directory = val_dict.get('directory') or ''
         self._location = val_dict['location']
-        self._alert = val_dict.get('alert') or False
+        self._name = val_dict['name']
+        self._url = val_dict['url']
+        self._vcs_type = val_dict.get('type') or detect_type(val_dict.get('url'))
 
     def __cmp__(self, other):
         """compare by application name"""
@@ -81,7 +82,7 @@ class BaseRepository(object):
         return self._alert
 
 
-class SvnRepo(BaseRepository):
+class SvnApplication(BaseApplication):
 
     def update(self):
         """
@@ -109,6 +110,9 @@ class SvnRepo(BaseRepository):
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory())
 
+    def get_constructor(values):
+        return {'svn':SvnApplication(values)}
+
     def __get_hidden_subfolder(self):
         return join(self.__get_hidden_dir(), self.directory)
 
@@ -124,7 +128,7 @@ class SvnRepo(BaseRepository):
     def __get_hidden_root(self):
         return join(self.location, '.svn_repository')
 
-class GitRepo(BaseRepository):
+class GitApplication(BaseApplication):
 
     def download(self):
         """
@@ -152,6 +156,9 @@ class GitRepo(BaseRepository):
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(),update=1)
 
+    def get_constructor(values):
+        return {'git':GitApplication(values)}
+
     def __get_hidden_subfolder(self):
         return join(self.__get_hidden_dir(), self.directory)
 
@@ -168,8 +175,7 @@ class GitRepo(BaseRepository):
         """ get the repository directory depending on vcs type """
         return join(self.location, '.git_repository')
 
-class HgRepo(BaseRepository):
-
+class HgApplication(BaseApplication):
 
     def download(self):
         """
@@ -197,6 +203,9 @@ class HgRepo(BaseRepository):
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(),update=1)
 
+    def get_constructor(values):
+        return {'hg':HgApplication(values)}
+
     def __get_hidden_subfolder(self):
         return join(self.__get_hidden_dir(), self.directory)
 
@@ -213,12 +222,40 @@ class HgRepo(BaseRepository):
         """ get the repository directory depending on vcs type """
         return join(self.location, '.hg_repository')
 
+class SingleFileApplication(BaseApplication):
+    #TODO create update function for SingleFileApplication
+    #TODO SingleFileApplication need documentation
+
+    def __init__(self, val_dict):
+        BaseApplication.__init__(self,val_dict)
+        self.__filename = val_dict.get('filename')
+
+    @property
+    def filename(self):
+        return self.__filename
+
+    def download(self):
+        """
+        Main function for repository create
+        """
+        import urllib
+        urllib.urlretrieve(self.url, join(self.location, self.filename))
+
+    def update(self):
+        print "Updating is not supported on single files"
+
+    def get_constructor(values):
+        return {'file':SingleFileApplication(values)}
+
+    def is_created():
+        return lexists(join(self.location,self.filename))
+
 if __name__ == '__main__':
-    ea = SvnRepo({
+    ea = SingleFileApplication({
         'name' : 'pepe',
-        'url': 'http://django-command-extensions.googlecode.com/svn/trunk/',
-        'type': 'svn',
-        'directory' : 'django_extensions',
+        'url': 'http://www.djangosnippets.org/snippets/1135/download/',
+        'filename': 'firebug.py',
+        'type': 'file',
         'location' : '/home/kenny/testing/'
         })
     ea.download_or_update()

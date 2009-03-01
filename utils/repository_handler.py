@@ -1,8 +1,8 @@
 import logging
 
-from deam.utils.repositories import GitRepo, SvnRepo, HgRepo
 from deam.utils.config_handler import ConfigHandler
-from deam.utils.utils import detect_type
+from deam.utils.repositories import GitApplication, SvnApplication, HgApplication
+from deam.utils.utils import detect_type, TermColors
 
 
 class RepositoryHandler(list):
@@ -34,20 +34,19 @@ class RepositoryHandler(list):
         """ Parse the apps file and load each application to the list """
         cfg = ConfigHandler(self.location)
         for app_values in cfg.parse_apps_file():
-            repo = None
             app_type = app_values.get('type') or detect_type(app_values.get('url'))
-            if app_type == 'hg':
-                repo = HgRepo(app_values)
-            elif app_type == 'svn':
-                repo = SvnRepo(app_values)
-            elif app_type == 'git':
-                repo = GitRepo(app_values)
+            repo = {'hg' : HgApplication(app_values),
+                    'svn' : SvnApplication(app_values),
+                    'git' : GitApplication(app_values),
+                    'file' : SingleFileApplication(app_values),
+                    None : None,
+                    }[app_type]
             self.append(repo)
 
     def list_apps(self):
-        print "%s:" % self.location
+        print "%s%s:%s" % (TermColors.HEADER,self.location,TermColors.ENDC)
         for app in self:
-            print "\t%s\t%s" % (app.name, app.url)
+            print "\t%s%s%s\t%s" % (TermColors.YELLOW,app.name,TermColors.ENDC, app.url)
 
 if __name__ == '__main__':
     from os.path import join, abspath, dirname
