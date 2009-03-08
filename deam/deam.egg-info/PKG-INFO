@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: deam
+Version: 0.4.3dev
+Summary: django external apps manager
+Home-page: UNKNOWN
+Author: Kenny Belizky & Martin Saizar
+Author-email: kenny@belitzky.com
+License: UNKNOWN
+Description: UNKNOWN
+Keywords: django apps custom-command
+Platform: UNKNOWN

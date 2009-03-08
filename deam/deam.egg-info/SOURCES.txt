@@ -1,0 +1,9 @@
+setup.cfg
+setup.py
+deam/__init__.py
+deam.egg-info/PKG-INFO
+deam.egg-info/SOURCES.txt
+deam.egg-info/dependency_links.txt
+deam.egg-info/entry_points.txt
+deam.egg-info/not-zip-safe
+deam.egg-info/top_level.txt
