@@ -3,6 +3,7 @@ from subprocess import call
 from os.path import join, lexists
 from distutils.dir_util import copy_tree
 from deam.utils.utils import detect_type
+from deam.utils.output import yellow
 
 #TODO manage externals of svn repositories
 #TODO manage git submodules
@@ -48,10 +49,10 @@ class BaseApplication(object):
 
     def download_or_update(self):
         if self.is_created():
-            print "Updating: %s" % self.name
+            print "Updating: %s" % yellow(self.name)
             self.update()
         else:
-            print "Downloading: %s" % self.name
+            print "Downloading: %s" % yellow(self.name)
             self.download()
 
     def show_alert(self):
@@ -247,7 +248,7 @@ class SingleFileApplication(BaseApplication):
     def get_constructor(values):
         return {'file':SingleFileApplication(values)}
 
-    def is_created():
+    def is_created(self):
         return lexists(join(self.location,self.filename))
 
 if __name__ == '__main__':
