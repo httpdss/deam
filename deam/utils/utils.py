@@ -1,10 +1,45 @@
 from django.conf import settings
+from os.path import lexists
 import os
+import re
+
+def get_patch_directory():
+    if hasattr(settings, 'PATCH_DIR'):
+        pre = settings.PATCH_DIR
+    else:
+        pre = '.patch'
+    return os.path.join(get_project_root(), pre) 
+
+def get_revision(revision):
+    rev = -1
+    m = re.search('Revision: (\d+)', revision)
+    if m: 
+        rev = m.group(1)
+    return rev
 
 def get_project_root():
     """ get the project root directory """
     settings_mod = __import__(settings.SETTINGS_MODULE, {}, {}, [''])
     return os.path.dirname(os.path.abspath(settings_mod.__file__))
+
+def output_file(name):
+    try:
+        fd = open(os.path.join(get_patch_directory(), name), 'r')
+        lines = fd.readlines()
+        for line in lines:
+            print line,
+    except IOError:
+        pass
+        
+def output_to_file(output, name):
+    final = output.splitlines()
+    if final:
+        if not(lexists(get_patch_directory())):
+            os.makedirs(get_patch_directory())
+        fd = open(os.path.join(get_patch_directory(), name), 'w')
+        for line in final:
+            fd.write(line + '\n')
+        fd.close()
 
 def directory_for_file(dir_name, file_name):
     fileList = []

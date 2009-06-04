@@ -1,8 +1,9 @@
 import os
-from subprocess import call
+from subprocess import PIPE, call, Popen
 from os.path import join, lexists
 from distutils.dir_util import copy_tree
-from deam.utils.utils import detect_type
+from deam.utils.utils import detect_type, output_to_file, output_file
+from deam.utils.utils import get_revision, get_patch_directory
 from deam.utils.output import yellow
 
 #TODO manage externals of svn repositories
@@ -47,13 +48,18 @@ class BaseApplication(object):
     def is_created(self):
         return lexists(self.get_absolute_directory())
 
+    def display_patch(self):
+        output_file(self.name)
+
+    def has_patch(self):
+        return os.path.isfile(os.path.join(get_patch_directory(), self.name))
+
     def download_or_update(self):
         if self.is_created():
-            while option not in ['Y', 'y', 'N', 'n']:
-                #clear screen?
-                option = raw_input("Respository already created, do you want to update? (Y/n)")
+            print "%s" % yellow(self.name),
+            option = raw_input("respository already created, do you want to update? (Y/n) ")
             if option in ['Y', 'y', '']:
-                print "Updating: %s" % yellow(self.name)
+                print "Updating %s" % yellow(self.name)
                 self.update()
         else:
             print "Downloading: %s" % yellow(self.name)
@@ -97,9 +103,20 @@ class SvnApplication(BaseApplication):
         #go to app hidden directory
         os.chdir(self.__get_hidden_dir())
         #execute update command inside app directory
-        call(['svn','update'])
+        revision = Popen(['svn', 'info'], stdout=PIPE).communicate()[0]
+        oldrev = get_revision(revision)
+        Popen(['svn', 'update'], stdout=PIPE).communicate()[0]
         #copy the desired subfolder from hidden to the app directory
-        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(), update=1)
+        revision = Popen(['svn', 'info'], stdout=PIPE).communicate()[0]
+        newrev = get_revision(revision)
+        output = Popen(['svn', 'diff', '-r', oldrev+':'+newrev, self.directory], stdout=PIPE).communicate()[0]
+        output_to_file(output, self.name)
+
+    def apply_patch(self):
+        os.chdir(self.get_absolute_directory())
+        p1 = Popen(['cat', os.path.join(get_patch_directory(), self.name)], stdout=PIPE)
+        p2 = Popen(['patch', '-p1'], stdin=p1.stdout)
+        p2.communicate()
 
     def download(self):
         """
@@ -149,6 +166,12 @@ class GitApplication(BaseApplication):
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory())
 
+    def apply_patch(self):
+        os.chdir(self.get_absolute_directory())
+        p1 = Popen(['cat', os.path.join(get_patch_directory(), self.name)], stdout=PIPE)
+        p2 = Popen(['patch', '-p2'], stdin=p1.stdout)
+        p2.communicate()
+
     def update(self):
         """
         Main function for repository update
@@ -157,9 +180,15 @@ class GitApplication(BaseApplication):
         #go to app hidden directory
         os.chdir(self.__get_hidden_dir())
         #execute update command inside app directory
-        call(['git', 'pull'])
+        #grab which is the current version
+        oldhash = Popen(['git', '--no-pager', 'log', '--pretty=format:%H', '-1'], stdout=PIPE).communicate()[0]
+        #git --no-pager log --pretty=format:%H -1
+        Popen(['git', 'pull'], stdout=PIPE).communicate()[0]
+        #diff old hash againt HEAD
         #copy the desired subfolder from hidden to the app directory
-        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(),update=1)
+        output = Popen(['git', '--no-pager', 'diff', oldhash, 'HEAD'], stdout=PIPE).communicate()[0]
+        output_to_file(output, self.name)
+
 
     def get_constructor(values):
         return {'git':GitApplication(values)}
