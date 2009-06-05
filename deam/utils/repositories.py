@@ -8,7 +8,7 @@ from deam.utils.output import yellow
 
 #TODO manage externals of svn repositories
 #TODO manage git submodules
-
+#TODO delete patch after selecting yes to apply
 #TODO easy_install support (easy_install -d <destination_directory> <package_name>)
 
 class BaseApplication(object):
@@ -210,6 +210,9 @@ class GitApplication(BaseApplication):
         return join(self.location, '.git_repository')
 
 class HgApplication(BaseApplication):
+
+    def apply_patch(self):
+        pass
 
     def download(self):
         """
