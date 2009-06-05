@@ -257,6 +257,6 @@ if __name__ == '__main__':
         'url': 'http://www.djangosnippets.org/snippets/1135/download/',
         'filename': 'firebug.py',
         'type': 'file',
-        'location' : '/home/kenny/testing/'
+        'location' : '/home/kenny/'
         })
     ea.download_or_update()

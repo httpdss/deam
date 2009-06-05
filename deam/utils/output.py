@@ -96,3 +96,7 @@ def red(text):
 	return codes["red"]+text+codes["reset"]
 def darkred(text):
 	return codes["darkred"]+text+codes["reset"]
+
+if __name__ == '__main__':
+    from deam.utils.output import yellow
+    print yellow("hole")
