@@ -3,6 +3,7 @@ import logging
 from deam.utils.config_handler import ConfigHandler
 from deam.utils.repositories import GitApplication, SvnApplication, HgApplication, SingleFileApplication
 from deam.utils.utils import detect_type, TermColors
+from deam.utils.output import yellow
 
 
 class RepositoryHandler(list):
@@ -29,7 +30,14 @@ class RepositoryHandler(list):
                 app.download_or_update()
             elif not app_name:
                 app.download_or_update()
-
+        for app in self:
+            if app.has_patch():
+                print "\nDisplaying %s patch\n\n" % yellow(app.name)
+                app.display_patch()
+                option = raw_input("\nWould you like to apply this patch? (Y/n) ")
+                if option in ['Y', 'y', '']:
+                    app.apply_patch()
+                
     def load_apps(self):
         """ Parse the apps file and load each application to the list """
         cfg = ConfigHandler(self.location)
