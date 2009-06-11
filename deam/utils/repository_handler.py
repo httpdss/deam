@@ -5,7 +5,7 @@ from deam.utils.repositories import GitApplication, SvnApplication, HgApplicatio
 from deam.utils.utils import detect_type, TermColors
 from deam.utils.output import yellow
 from Queue import Queue
-from threading import Thread, Lock
+from threading import Thread
 
 
 #TODO: cant do without locks, switch to fork()?
@@ -26,24 +26,19 @@ class RepositoryHandler(list):
         st.setLevel(logging.INFO)
         self.logger.addHandler(st)
 
-    def worker(self, q, lo):
+    def worker(self, q):
         while True:
             app = q.get()
-            lo.acquire()
-            try:
-                app.download_or_update()
-            finally:
-                lo.release()
+            app.download_or_update()
             q.task_done()
 
     def download_apps(self, app_name=''):
         """
         """
         q = Queue()
-        lo = Lock()
         print 'Preparing for download/update'
         for i in range(2):
-            current = Thread(target=self.worker, args=(q,lo,))
+            current = Thread(target=self.worker, args=(q,))
             current.setDaemon(True)
             current.start()
         for app in self:

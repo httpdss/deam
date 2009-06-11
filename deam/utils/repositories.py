@@ -96,15 +96,14 @@ class SvnApplication(BaseApplication):
         """
 
         #go to app hidden directory
-        os.chdir(self.__get_hidden_dir())
         #execute update command inside app directory
-        revision = Popen(['svn', 'info'], stdout=PIPE).communicate()[0]
+        revision = Popen(['svn', 'info', self.__get_hidden_dir()], stdout=PIPE).communicate()[0]
         oldrev = get_revision(revision)
-        Popen(['svn', 'update'], stdout=PIPE).communicate()[0]
+        Popen(['svn', 'update', self.__get_hidden_dir()], stdout=PIPE).communicate()[0]
         #copy the desired subfolder from hidden to the app directory
-        revision = Popen(['svn', 'info'], stdout=PIPE).communicate()[0]
+        revision = Popen(['svn', 'info', self.__get_hidden_dir()], stdout=PIPE).communicate()[0]
         newrev = get_revision(revision)
-        output = Popen(['svn', 'diff', '-r', oldrev+':'+newrev, self.directory], stdout=PIPE).communicate()[0]
+        output = Popen(['svn', 'diff', self.__get_hidden_dir(), '-r', oldrev+':'+newrev, self.directory], stdout=PIPE).communicate()[0]
         output_to_file(output, self.name)
 
     def apply_patch(self):
@@ -122,8 +121,7 @@ class SvnApplication(BaseApplication):
             os.makedirs(self.__get_hidden_root())
 
         #get the remote app from repository
-        os.chdir(self.__get_hidden_root())
-        call(['svn','co', self.url, self.name])
+        call(['svn','co', self.url, self.__get_hidden_dir()])
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory())
 
@@ -156,8 +154,7 @@ class GitApplication(BaseApplication):
             os.makedirs(self.__get_hidden_root())
 
         #get the remote app from repository
-        os.chdir(self.__get_hidden_root())
-        call(['git', 'clone', self.url, self.name])
+        call(['git', 'clone', self.url, self.__get_hidden_dir()])
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory())
 
@@ -173,15 +170,14 @@ class GitApplication(BaseApplication):
         """
 
         #go to app hidden directory
-        os.chdir(self.__get_hidden_dir())
         #execute update command inside app directory
         #grab which is the current version
-        oldhash = Popen(['git', '--no-pager', 'log', '--pretty=format:%H', '-1'], stdout=PIPE).communicate()[0]
+        oldhash = Popen(['git', '--git-dir=' + os.path.join(self.__get_hidden_dir(),'.git'), '--no-pager', 'log', '--pretty=format:%H', '-1'], stdout=PIPE).communicate()[0]
         #git --no-pager log --pretty=format:%H -1
-        Popen(['git', 'pull'], stdout=PIPE).communicate()[0]
+        Popen(['git', '--git-dir=' + os.path.join(self.__get_hidden_dir(),'.git'), 'pull'], stdout=PIPE).communicate()[0]
         #diff old hash againt HEAD
         #copy the desired subfolder from hidden to the app directory
-        output = Popen(['git', '--no-pager', 'diff', oldhash, 'HEAD'], stdout=PIPE).communicate()[0]
+        output = Popen(['git', '--git-dir=' + os.path.join(self.__get_hidden_dir(), '.git'), '--no-pager', 'diff', oldhash, 'HEAD'], stdout=PIPE).communicate()[0]
         output_to_file(output, self.name)
 
 
