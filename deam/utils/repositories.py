@@ -5,6 +5,8 @@ from distutils.dir_util import copy_tree
 from deam.utils.utils import detect_type, output_to_file, output_file
 from deam.utils.utils import get_revision, get_patch_directory
 from deam.utils.output import yellow
+from urllib import urlretrieve
+
 
 #TODO manage externals of svn repositories
 #TODO manage git submodules
@@ -266,17 +268,19 @@ class SingleFileApplication(BaseApplication):
         """
         Main function for repository create
         """
-        import urllib
-        urllib.urlretrieve(self.url, join(self.location, self.filename))
+        urlretrieve(self.url, join(self.location, self.filename))
 
     def update(self):
-        print "Updating is not supported on single files"
+        urlretrieve(self.url, join(self.location, self.filename + '.tmp'))
+        output = Popen(['diff', join(self.location, self.filename), join(self.location, self.filename + '.tmp')], stdout=PIPE).communicate()[0]
+        output_to_file(output, self.name)
+        os.remove(join(self.location, self.filename + '.tmp'))
 
     def get_constructor(values):
         return {'file':SingleFileApplication(values)}
 
     def is_created(self):
-        return lexists(join(self.location,self.filename))
+        return lexists(join(self.location, self.filename))
 
 if __name__ == '__main__':
     ea = SingleFileApplication({
@@ -284,6 +288,6 @@ if __name__ == '__main__':
         'url': 'http://www.djangosnippets.org/snippets/1135/download/',
         'filename': 'firebug.py',
         'type': 'file',
-        'location' : '/home/kenny/'
+        'location' : '/tmp'
         })
     ea.download_or_update()
