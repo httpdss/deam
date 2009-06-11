@@ -15,7 +15,7 @@ def get_revision(revision):
     m = re.search('Revision: (\d+)', revision)
     if m: 
         rev = m.group(1)
-    return rev
+    return str(rev)
 
 def get_project_root():
     """ get the project root directory """

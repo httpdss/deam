@@ -56,13 +56,8 @@ class BaseApplication(object):
 
     def download_or_update(self):
         if self.is_created():
-            print "%s" % yellow(self.name),
-            option = raw_input("respository already created, do you want to update? (Y/n) ")
-            if option in ['Y', 'y', '']:
-                print "Updating %s" % yellow(self.name)
-                self.update()
+            self.update()
         else:
-            print "Downloading: %s" % yellow(self.name)
             self.download()
 
     def show_alert(self):
