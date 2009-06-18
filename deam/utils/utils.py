@@ -33,7 +33,7 @@ def output_file(name):
     except IOError:
         pass
         
-def output_to_file(output, name:
+def output_to_file(output, name):
     final = output.splitlines()
     if final:
         if not(lexists(get_patch_directory())):

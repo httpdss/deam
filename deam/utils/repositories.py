@@ -3,7 +3,7 @@ from subprocess import PIPE, call, Popen
 from os.path import join, lexists
 from distutils.dir_util import copy_tree
 from deam.utils.utils import detect_type, output_to_file, output_file
-from deam.utils.utils import get_revision, get_patch_directory, strip_rn
+from deam.utils.utils import get_revision, get_patch_directory
 from deam.utils.output import yellow
 from urllib import urlretrieve
 
