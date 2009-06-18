@@ -2,6 +2,8 @@ from django.conf import settings
 from os.path import lexists
 import os
 import re
+import fileinput
+
 
 def get_patch_directory():
     if hasattr(settings, 'PATCH_DIR'):
@@ -31,7 +33,7 @@ def output_file(name):
     except IOError:
         pass
         
-def output_to_file(output, name):
+def output_to_file(output, name:
     final = output.splitlines()
     if final:
         if not(lexists(get_patch_directory())):

@@ -3,15 +3,15 @@ from subprocess import PIPE, call, Popen
 from os.path import join, lexists
 from distutils.dir_util import copy_tree
 from deam.utils.utils import detect_type, output_to_file, output_file
-from deam.utils.utils import get_revision, get_patch_directory
+from deam.utils.utils import get_revision, get_patch_directory, strip_rn
 from deam.utils.output import yellow
 from urllib import urlretrieve
-
 
 #TODO manage externals of svn repositories
 #TODO manage git submodules
 #TODO delete patch after selecting yes to apply
 #TODO easy_install support (easy_install -d <destination_directory> <package_name>)
+#TODO update support for mercurial
 
 class BaseApplication(object):
     """
@@ -45,7 +45,7 @@ class BaseApplication(object):
         return "%s - %s" % (self._name, self._url)
 
     def get_absolute_directory(self):
-        return join(self.location, self.directory or self.name)
+        return join(self.location, self.directory or self.name or '')
 
     def is_created(self):
         return lexists(self.get_absolute_directory())
@@ -96,7 +96,6 @@ class SvnApplication(BaseApplication):
         """
         Main function for repository update
         """
-
         #go to app hidden directory
         #execute update command inside app directory
         revision = Popen(['svn', 'info', self.__get_hidden_dir()], stdout=PIPE).communicate()[0]
@@ -110,9 +109,8 @@ class SvnApplication(BaseApplication):
 
     def apply_patch(self):
         os.chdir(self.get_absolute_directory())
-        p1 = Popen(['cat', os.path.join(get_patch_directory(), self.name)], stdout=PIPE)
-        p2 = Popen(['patch', '-p1'], stdin=p1.stdout)
-        p2.communicate()
+        p3 = Popen(['patch', '-p1', '-i', os.path.join(get_patch_directory(), self.name)]).communicate()
+        
 
     def download(self):
         """
@@ -121,7 +119,6 @@ class SvnApplication(BaseApplication):
         #create the hidden root
         if not self.__is_hidden_root_created():
             os.makedirs(self.__get_hidden_root())
-
         #get the remote app from repository
         call(['svn','co', self.url, self.__get_hidden_dir()])
         #copy the desired subfolder from hidden to the app directory
@@ -154,7 +151,6 @@ class GitApplication(BaseApplication):
         #create the hidden root
         if not self.__is_hidden_root_created():
             os.makedirs(self.__get_hidden_root())
-
         #get the remote app from repository
         call(['git', 'clone', self.url, self.__get_hidden_dir()])
         #copy the desired subfolder from hidden to the app directory
@@ -162,15 +158,12 @@ class GitApplication(BaseApplication):
 
     def apply_patch(self):
         os.chdir(self.get_absolute_directory())
-        p1 = Popen(['cat', os.path.join(get_patch_directory(), self.name)], stdout=PIPE)
-        p2 = Popen(['patch', '-p2'], stdin=p1.stdout)
-        p2.communicate()
+        p3 = Popen(['patch', '-p2', '-i', os.path.join(get_patch_directory(), self.name)]).communicate()
 
     def update(self):
         """
         Main function for repository update
         """
-
         #go to app hidden directory
         #execute update command inside app directory
         #grab which is the current version
@@ -188,9 +181,6 @@ class GitApplication(BaseApplication):
 
     def __get_hidden_subfolder(self):
         return join(self.__get_hidden_dir(), self.directory)
-
-    def __is_hidden_dir_created(self):
-        return lexists(self.__get_absolute_hidden_directory())
 
     def __get_hidden_dir(self):
         return join (self.__get_hidden_root(), self.name)
@@ -214,7 +204,6 @@ class HgApplication(BaseApplication):
         #create the hidden root
         if not self.__is_hidden_root_created():
             os.makedirs(self.__get_hidden_root())
-
         #get the remote app from repository
         os.chdir(self.__get_hidden_root())
         call(['hg', 'clone', self.url, self.name])
@@ -225,7 +214,6 @@ class HgApplication(BaseApplication):
         """
         Main function for repository update
         """
-
         #go to app hidden directory
         os.chdir(self.__get_hidden_dir())
         #execute update command inside app directory
@@ -238,9 +226,6 @@ class HgApplication(BaseApplication):
 
     def __get_hidden_subfolder(self):
         return join(self.__get_hidden_dir(), self.directory)
-
-    def __is_hidden_dir_created(self):
-        return lexists(self.__get_absolute_hidden_directory())
 
     def __get_hidden_dir(self):
         return join (self.__get_hidden_root(), self.name)
@@ -268,19 +253,38 @@ class SingleFileApplication(BaseApplication):
         """
         Main function for repository create
         """
+        if not self.__is_hidden_root_created():
+            os.makedirs(self.__get_hidden_root())        
         urlretrieve(self.url, join(self.location, self.filename))
 
+    def apply_patch(self):
+        os.chdir(self.location)
+        p3 = Popen(['patch', self.filename, join(get_patch_directory(), self.name)]).communicate()
+        
     def update(self):
         urlretrieve(self.url, join(self.location, self.filename + '.tmp'))
-        output = Popen(['diff', join(self.location, self.filename), join(self.location, self.filename + '.tmp')], stdout=PIPE).communicate()[0]
+        #strip_rn(join(self.location, self.filename + '.tmp'))
+        #strip_rn(join(self.location, self.filename))
+        output = Popen(['diff', '-u', join(self.location, self.filename), join(self.location, self.filename + '.tmp')], stdout=PIPE).communicate()[0]
         output_to_file(output, self.name)
-        os.remove(join(self.location, self.filename + '.tmp'))
 
     def get_constructor(values):
         return {'file':SingleFileApplication(values)}
 
     def is_created(self):
         return lexists(join(self.location, self.filename))
+
+    def __get_hidden_subfolder(self):
+        return join(self.__get_hidden_dir(), self.directory)
+
+    def __get_hidden_dir(self):
+        return join (self.__get_hidden_root(), self.name)
+
+    def __is_hidden_root_created(self):
+        return lexists(self.__get_hidden_root())
+
+    def __get_hidden_root(self):
+        return join(self.location, '.file_repository')
 
 if __name__ == '__main__':
     ea = SingleFileApplication({
