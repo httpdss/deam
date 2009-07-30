@@ -38,7 +38,7 @@ class Command(BaseCommand):
 
     args = "[external_appname]"
 
-    def handle(self, app_name = '', *args, **options):
+    def handle(self, app_name = '', *args, **options): #IGNORE:W0221
         """
         external apps command handler
         """

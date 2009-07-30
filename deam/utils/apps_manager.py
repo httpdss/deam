@@ -1,14 +1,13 @@
 '''
-
+Implementation of the application manager
 '''
 
 from os.path import join, abspath, dirname
-from deam.utils.utils import directory_for_file
 
+from deam.utils.utils import directory_for_file
 from deam.utils.repository_handler import RepositoryHandler
 from deam.utils.wsgi_handler import WSGIHandler
 from deam.utils.exceptions import NoAppsFileError
-
 
 
 DEFAULT_CONFIG = {}
@@ -19,11 +18,12 @@ class AppsManager(object):
     This class represents
     """
 
-    def __init__(self, base_path, config = {}):
+    def __init__(self, base_path, config = None):
         """
         Constructor.
         """
-        self.config = DEFAULT_CONFIG.update(config)
+        if config:
+            self.config = DEFAULT_CONFIG.update(config)
 
         self.app_folders = directory_for_file(base_path, 'external.apps')
         if not self.app_folders:

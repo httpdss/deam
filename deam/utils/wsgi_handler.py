@@ -21,6 +21,7 @@ class WSGIHandler(object):
 
     def write_file(self, file_name, settings_path):
         """
+        method able to write join and write the wsgi file
         """
         wsgi_file = open(file_name, 'w')
         wsgi_file.writelines([
@@ -47,5 +48,3 @@ class WSGIHandler(object):
 if __name__ == '__main__':
     wsgi_handler = WSGIHandler(['a', 'b'])
     wsgi_handler.write_file('django.wsgi.tmp', 'lala')
-
-# vim: ai ts=4 sts=4 et sw=4
