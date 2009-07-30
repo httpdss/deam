@@ -1,0 +1,36 @@
+h1. DEAM Changelog
+
+h2. New in 0.4.3
+
+* download single external apps
+* list external apps
+
+h2. New in 0.4.2
+
+* added alert support. If set to True, every time a repository is created for an application, deam will issue an alert, advising you to add the new app path to the python path.˝
+
+h2. New in 0.4.1
+
+* custom exceptions, code cleanup
+
+h2. New in 0.4
+
+* sub directory support
+
+h2. New in 0.3
+
+* mercurial support
+* git support
+* generalized download/update functions
+* internal testing
+
+h2. New in 0.2
+
+* wsgi generator (under development)
+* name change
+
+h2. New in 0.1
+
+* svn checkout
+* folder scanning for the external.apps file
+

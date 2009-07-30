@@ -1,0 +1,35 @@
+h1. DEAM (Django External Apps Manager)
+
+**IMPORTANT: not for use on production sites (for now)**
+
+This project is focused on resolving the recurring problem of managing external apps when working with django projects by taking a different approach: custom commands.
+
+h2. Installation
+
+# Download DEAM from Github
+# Add DEAM to your python path and to the INSTALLED_APPS on your project
+
+h2. Setting Up
+
+The first step is to choose in which folder you will have your external applications. This folders will have to include a file called ***external.apps*** with the following file format:
+
+Format for the apps file::
+
+    [app_name]
+    url: project url
+    type: vcs type
+    directory: directory wanted
+    
+    ...
+    
+    [other app_name]
+    ...
+    ...
+
+After correctly setting the external.apps files on your different folders, you can now execute this commands from your project root:
+# Download or update a single application: python manage.py get_apps [app_name]
+# List all external applications: python manage.py -l
+# Download or update all applications: python manage.py -a
+
+
+

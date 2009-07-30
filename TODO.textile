@@ -1,0 +1,13 @@
+h1. TODO list
+
+h2. General
+
+* add libs support
+* manage multiple subdirectories of a repository
+* after app update, only copy if app has been updated
+
+h2. WSGI Generator
+
+* wsgi generator based on external.apps file location
+
+
