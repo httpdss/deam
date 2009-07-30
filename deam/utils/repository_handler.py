@@ -22,7 +22,7 @@ class RepositoryHandler(list):
         st.setLevel(logging.INFO)
         self.logger.addHandler(st)
 
-    def download_apps(self, app_name=''):
+    def download_apps(self, app_name = ''):
         """
         """
         for app in self:
@@ -37,7 +37,7 @@ class RepositoryHandler(list):
                 option = raw_input("\nWould you like to apply this patch? (Y/n) ")
                 if option in ['Y', 'y', '']:
                     app.apply_patch()
-                
+
     def load_apps(self):
         """ Parse the apps file and load each application to the list """
         cfg = ConfigHandler(self.location)
@@ -52,9 +52,9 @@ class RepositoryHandler(list):
             self.append(repo)
 
     def list_apps(self):
-        print "%s%s:%s" % (TermColors.HEADER,self.location,TermColors.ENDC)
+        print "%s%s:%s" % (TermColors.HEADER, self.location, TermColors.ENDC)
         for app in self:
-            print "\t%s%s%s\t%s" % (TermColors.YELLOW,app.name,TermColors.ENDC, app.url)
+            print "\t%s%s%s\t%s" % (TermColors.YELLOW, app.name, TermColors.ENDC, app.url)
 
 if __name__ == '__main__':
     from os.path import join, abspath, dirname

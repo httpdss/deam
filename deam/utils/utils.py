@@ -8,12 +8,12 @@ def get_patch_directory():
         pre = settings.PATCH_DIR
     else:
         pre = '.patch'
-    return os.path.join(get_project_root(), pre) 
+    return os.path.join(get_project_root(), pre)
 
 def get_revision(revision):
     rev = -1
     m = re.search('Revision: (\d+)', revision)
-    if m: 
+    if m:
         rev = m.group(1)
     return rev
 
@@ -30,7 +30,7 @@ def output_file(name):
             print line,
     except IOError:
         pass
-        
+
 def output_to_file(output, name):
     final = output.splitlines()
     if final:
@@ -46,12 +46,12 @@ def directory_for_file(dir_name, file_name):
     for file in os.listdir(dir_name):
         dirfile = os.path.join(dir_name, file)
         if os.path.isfile(dirfile):
-            head,tail=os.path.split(dirfile)
+            head, tail = os.path.split(dirfile)
             if tail == file_name:
                 fileList.append(head)
         # recursively access file names in subdirectories
         elif os.path.isdir(dirfile):
-            fileList.extend(directory_for_file(dirfile,file_name))
+            fileList.extend(directory_for_file(dirfile, file_name))
     return fileList
 
 def detect_type(url):

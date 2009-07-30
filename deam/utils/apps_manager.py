@@ -1,3 +1,7 @@
+'''
+
+'''
+
 from os.path import join, abspath, dirname
 from deam.utils.utils import directory_for_file
 
@@ -5,12 +9,7 @@ from deam.utils.repository_handler import RepositoryHandler
 from deam.utils.wsgi_handler import WSGIHandler
 from deam.utils.exceptions import NoAppsFileError
 
-"""
-TODO wsgi generator based on external.apps file location
-TODO add libs support
-TODO manage multiple subdirectories of a repository
-TODO after app update, only copy if app has been updated
-"""
+
 
 DEFAULT_CONFIG = {}
 
@@ -20,7 +19,7 @@ class AppsManager(object):
     This class represents
     """
 
-    def __init__(self, base_path, config={}):
+    def __init__(self, base_path, config = {}):
         """
         Constructor.
         """
@@ -33,11 +32,11 @@ class AppsManager(object):
         #create all repository_handlers and store them in a list
         self.repositories = []
         for folder in self.app_folders:
-            rh = RepositoryHandler(folder)
-            rh.load_apps()
-            self.repositories.append(rh)
+            repo_handler = RepositoryHandler(folder)
+            repo_handler.load_apps()
+            self.repositories.append(repo_handler)
 
-    def download_app(self, app_name=''):
+    def download_app(self, app_name = ''):
         """
         go for each folder that has the external.apps file and create
         the RepositoryHandler for it.
@@ -45,20 +44,20 @@ class AppsManager(object):
 
         #TODO: check if app_name exists and throw error if it is not found
         #missing single app download implementation?
-        
-        for rh in self.repositories:
-            rh.download_apps(app_name)
+
+        for repo in self.repositories:
+            repo.download_apps(app_name)
 
     def generate_wsgi(self, settings_path):
-        """
-        """
+        """test function for wsgi autogeneration """
         wsgi_handler = WSGIHandler(self.app_folders)
         wsgi_handler.write_file('django.wsgi.tmp', settings_path)
 
     def list_external_apps(self):
-        for rh in self.repositories:
-            rh.list_apps()
+        "list all external apps"
+        for repo in self.repositories:
+            repo.list_apps()
 
 if __name__ == '__main__':
-    am = AppsManager(join(dirname(dirname(abspath(__file__))), 'testing'))
-    am.download_app('basic')
+    AM = AppsManager(join(dirname(dirname(abspath(__file__))), 'testing'))
+    AM.download_app('basic')

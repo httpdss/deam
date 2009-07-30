@@ -1,2 +1,5 @@
 dist*
 build*
+.project
+.pydevproject
+.settings

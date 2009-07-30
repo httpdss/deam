@@ -103,19 +103,19 @@ class SvnApplication(BaseApplication):
         #go to app hidden directory
         os.chdir(self.__get_hidden_dir())
         #execute update command inside app directory
-        revision = Popen(['svn', 'info'], stdout=PIPE).communicate()[0]
+        revision = Popen(['svn', 'info'], stdout = PIPE).communicate()[0]
         oldrev = get_revision(revision)
-        Popen(['svn', 'update'], stdout=PIPE).communicate()[0]
+        Popen(['svn', 'update'], stdout = PIPE).communicate()[0]
         #copy the desired subfolder from hidden to the app directory
-        revision = Popen(['svn', 'info'], stdout=PIPE).communicate()[0]
+        revision = Popen(['svn', 'info'], stdout = PIPE).communicate()[0]
         newrev = get_revision(revision)
-        output = Popen(['svn', 'diff', '-r', oldrev+':'+newrev, self.directory], stdout=PIPE).communicate()[0]
+        output = Popen(['svn', 'diff', '-r', oldrev + ':' + newrev, self.directory], stdout = PIPE).communicate()[0]
         output_to_file(output, self.name)
 
     def apply_patch(self):
         os.chdir(self.get_absolute_directory())
-        p1 = Popen(['cat', os.path.join(get_patch_directory(), self.name)], stdout=PIPE)
-        p2 = Popen(['patch', '-p1'], stdin=p1.stdout)
+        p1 = Popen(['cat', os.path.join(get_patch_directory(), self.name)], stdout = PIPE)
+        p2 = Popen(['patch', '-p1'], stdin = p1.stdout)
         p2.communicate()
 
     def download(self):
@@ -128,7 +128,7 @@ class SvnApplication(BaseApplication):
 
         #get the remote app from repository
         os.chdir(self.__get_hidden_root())
-        call(['svn','co', self.url, self.name])
+        call(['svn', 'co', self.url, self.name])
         #copy the desired subfolder from hidden to the app directory
         copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory())
 
@@ -168,8 +168,8 @@ class GitApplication(BaseApplication):
 
     def apply_patch(self):
         os.chdir(self.get_absolute_directory())
-        p1 = Popen(['cat', os.path.join(get_patch_directory(), self.name)], stdout=PIPE)
-        p2 = Popen(['patch', '-p2'], stdin=p1.stdout)
+        p1 = Popen(['cat', os.path.join(get_patch_directory(), self.name)], stdout = PIPE)
+        p2 = Popen(['patch', '-p2'], stdin = p1.stdout)
         p2.communicate()
 
     def update(self):
@@ -181,12 +181,12 @@ class GitApplication(BaseApplication):
         os.chdir(self.__get_hidden_dir())
         #execute update command inside app directory
         #grab which is the current version
-        oldhash = Popen(['git', '--no-pager', 'log', '--pretty=format:%H', '-1'], stdout=PIPE).communicate()[0]
+        oldhash = Popen(['git', '--no-pager', 'log', '--pretty=format:%H', '-1'], stdout = PIPE).communicate()[0]
         #git --no-pager log --pretty=format:%H -1
-        Popen(['git', 'pull'], stdout=PIPE).communicate()[0]
+        Popen(['git', 'pull'], stdout = PIPE).communicate()[0]
         #diff old hash againt HEAD
         #copy the desired subfolder from hidden to the app directory
-        output = Popen(['git', '--no-pager', 'diff', oldhash, 'HEAD'], stdout=PIPE).communicate()[0]
+        output = Popen(['git', '--no-pager', 'diff', oldhash, 'HEAD'], stdout = PIPE).communicate()[0]
         output_to_file(output, self.name)
 
 
@@ -238,7 +238,7 @@ class HgApplication(BaseApplication):
         #execute update command inside app directory
         call(['hg', 'pull', '-u'])
         #copy the desired subfolder from hidden to the app directory
-        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(),update=1)
+        copy_tree(self.__get_hidden_subfolder(), self.get_absolute_directory(), update = 1)
 
     def get_constructor(values):
         return {'hg':HgApplication(values)}
@@ -264,7 +264,7 @@ class SingleFileApplication(BaseApplication):
     #TODO SingleFileApplication need documentation
 
     def __init__(self, val_dict):
-        BaseApplication.__init__(self,val_dict)
+        BaseApplication.__init__(self, val_dict)
         self.__filename = val_dict.get('filename')
 
     @property
@@ -285,7 +285,7 @@ class SingleFileApplication(BaseApplication):
         return {'file':SingleFileApplication(values)}
 
     def is_created(self):
-        return lexists(join(self.location,self.filename))
+        return lexists(join(self.location, self.filename))
 
 if __name__ == '__main__':
     ea = SingleFileApplication({

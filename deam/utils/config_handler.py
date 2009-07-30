@@ -1,3 +1,6 @@
+"""
+    Config Handler
+"""
 import ConfigParser
 from os.path import join
 
@@ -18,13 +21,10 @@ class ConfigHandler(object):
         """parse an apps file """
         result = []
         config = ConfigParser.SafeConfigParser()
-        config.read(self._get_apps_file())
+        config.read(join(self.location, EXTERNAL_APPS_FILE))
         for sec in config.sections():
             #get all items and assign name from the section name.
-            temp = dict(config.items(sec) + [('name',sec), ('location',self.location)])
+            temp = dict(config.items(sec) + 
+                        [('name', sec), ('location', self.location)])
             result.append(temp)
         return result
-
-    def _get_apps_file(self):
-        return join(self.location, EXTERNAL_APPS_FILE)
-# vim: ai ts=4 sts=4 et sw=4

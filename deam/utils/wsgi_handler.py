@@ -1,4 +1,10 @@
-import os, sys
+"""
+
+Author: Kenneth Belizky
+  
+"""
+
+
 
 class WSGIHandler(object):
     """
@@ -7,7 +13,7 @@ class WSGIHandler(object):
 
     def __init__(self, app_folders):
         """
-        Constructor.
+        Constructor
         
         apps -- 
         """
@@ -16,7 +22,7 @@ class WSGIHandler(object):
     def write_file(self, file_name, settings_path):
         """
         """
-        wsgi_file = open(file_name,'w')
+        wsgi_file = open(file_name, 'w')
         wsgi_file.writelines([
             'import os\n',
             'import sys\n',
@@ -28,7 +34,7 @@ class WSGIHandler(object):
 
         #add all folders to python path
         for folder in self._app_folders:
-            wsgi_file.write( 'sys.path.insert(0, abspath(\'%s\'))\n' % folder)
+            wsgi_file.write('sys.path.insert(0, abspath(\'%s\'))\n' % folder)
 
         wsgi_file.writelines([
             '\n',
@@ -39,7 +45,7 @@ class WSGIHandler(object):
             'application = WSGIHandler()\n' ])
 
 if __name__ == '__main__':
-    wsgi_handler = WSGIHandler(['a','b'])
-    wsgi_handler.write_file('django.wsgi.tmp','lala')
+    wsgi_handler = WSGIHandler(['a', 'b'])
+    wsgi_handler.write_file('django.wsgi.tmp', 'lala')
 
 # vim: ai ts=4 sts=4 et sw=4
