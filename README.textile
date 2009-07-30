@@ -13,23 +13,23 @@ h2. Setting Up
 
 The first step is to choose in which folder you will have your external applications. This folders will have to include a file called ***external.apps*** with the following file format:
 
-Format for the apps file::
-
-    [app_name]
-    url: project url
-    type: vcs type
-    directory: directory wanted
-    
-    ...
-    
-    [other app_name]
-    ...
-    ...
+Format for the apps file:
+<pre>
+     <code>
+        [app_name]
+        url: project url
+        type: vcs type
+        directory: directory wanted
+        ...
+        [other app_name]
+        ...
+    </code>
+</pre>
 
 After correctly setting the external.apps files on your different folders, you can now execute this commands from your project root:
 # Download or update a single application: python manage.py get_apps [app_name]
-# List all external applications: python manage.py -l
-# Download or update all applications: python manage.py -a
+# List all external applications: _python manage.py -l_
+# Download or update all applications: _python manage.py -a_
 
 
 
