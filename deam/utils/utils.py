@@ -2,6 +2,8 @@ from django.conf import settings
 from os.path import lexists
 import os
 import re
+import fileinput
+
 
 def get_patch_directory():
     if hasattr(settings, 'PATCH_DIR'):
@@ -15,7 +17,7 @@ def get_revision(revision):
     m = re.search('Revision: (\d+)', revision)
     if m:
         rev = m.group(1)
-    return rev
+    return str(rev)
 
 def get_project_root():
     """ get the project root directory """

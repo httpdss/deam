@@ -4,7 +4,11 @@ from deam.utils.config_handler import ConfigHandler
 from deam.utils.repositories import GitApplication, SvnApplication, HgApplication, SingleFileApplication
 from deam.utils.utils import detect_type, TermColors
 from deam.utils.output import yellow
+from Queue import Queue
+from threading import Thread
 
+
+#TODO: cant do without locks, switch to fork()?
 
 class RepositoryHandler(list):
     """
@@ -22,14 +26,26 @@ class RepositoryHandler(list):
         st.setLevel(logging.INFO)
         self.logger.addHandler(st)
 
-    def download_apps(self, app_name = ''):
+    def worker(self, q):
+        while True:
+            app = q.get()
+            app.download_or_update()
+            q.task_done()
+
+    def download_apps(self, app_name=''):
         """
         """
+        q = Queue()
+        print 'Preparing for download/update'
+        for i in range(2):
+            current = Thread(target=self.worker, args=(q,))
+            current.setDaemon(True)
+            current.start()
         for app in self:
-            if app_name and app_name == app.name:
-                app.download_or_update()
-            elif not app_name:
-                app.download_or_update()
+            if (app_name and app_name == app.name) or not app_name:
+                q.put(app)
+        q.join()
+        print 'Download/update complete'
         for app in self:
             if app.has_patch():
                 print "\nDisplaying %s patch\n\n" % yellow(app.name)
@@ -37,7 +53,7 @@ class RepositoryHandler(list):
                 option = raw_input("\nWould you like to apply this patch? (Y/n) ")
                 if option in ['Y', 'y', '']:
                     app.apply_patch()
-
+                
     def load_apps(self):
         """ Parse the apps file and load each application to the list """
         cfg = ConfigHandler(self.location)
@@ -52,9 +68,9 @@ class RepositoryHandler(list):
             self.append(repo)
 
     def list_apps(self):
-        print "%s%s:%s" % (TermColors.HEADER, self.location, TermColors.ENDC)
+        print "%s%s:%s" % (TermColors.HEADER,self.location,TermColors.ENDC)
         for app in self:
-            print "\t%s%s%s\t%s" % (TermColors.YELLOW, app.name, TermColors.ENDC, app.url)
+            print "\t%s%s%s\t%s" % (TermColors.YELLOW,app.name,TermColors.ENDC, app.url)
 
 if __name__ == '__main__':
     from os.path import join, abspath, dirname
