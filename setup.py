@@ -1,13 +1,17 @@
+"""
+setup script for deam
+"""
+
 from setuptools import setup, find_packages
 
-version = '0.4.3'
+VERSION = '0.4.4'
 
 setup(name='deam',
-      version=version,
+      version=VERSION,
       description="django external apps manager",
       long_description="""\
 """,
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      classifiers=[],
       keywords='django apps custom-command',
       author='Kenny Belizky & Martin Saizar',
       author_email='kenny@belitzky.com',
