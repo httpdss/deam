@@ -1,14 +1,19 @@
+"""
+repository handler
+
+"""
 import logging
 
 from deam.utils.config_handler import ConfigHandler
-from deam.utils.repositories import GitApplication, SvnApplication, HgApplication, SingleFileApplication
+from deam.utils.repositories import GitApplication, SvnApplication, \
+    HgApplication, SingleFileApplication
 from deam.utils.utils import detect_type, TermColors
 from deam.utils.output import yellow
 from Queue import Queue
 from threading import Thread
 
 
-#TODO: cant do without locks, switch to fork()?
+#TODO: cant do without locks, switch to fork()? #IGNORE:W0511
 
 class RepositoryHandler(list):
     """
@@ -19,41 +24,44 @@ class RepositoryHandler(list):
         """"
         Constructor.
         """
+        list.__init__(self)
         self.location = location
         self.logger = logging.getLogger('repository_handler')
         self.logger.setLevel(logging.INFO)
-        st = logging.StreamHandler()
-        st.setLevel(logging.INFO)
-        self.logger.addHandler(st)
+        strm = logging.StreamHandler()
+        strm.setLevel(logging.INFO)
+        self.logger.addHandler(strm)
 
-    def worker(self, q):
+    def download_thread(self, queue):
+        """worker method thread that does the downloading"""
         while True:
-            app = q.get()
+            app = queue.get()
             app.download_or_update()
-            q.task_done()
+            queue.task_done()
 
-    def download_apps(self, app_name=''):
+    def download_apps(self, app_name = ''):
         """
+        download one or multiple apps in threaded mode
         """
-        q = Queue()
-        print 'Preparing for download/update'
+        queue = Queue()
+        self.logger.info('Preparing for download/update')
         for i in range(2):
-            current = Thread(target=self.worker, args=(q,))
+            current = Thread(target = self.download_thread, name = "dl-%s" % i, args = (queue,))
             current.setDaemon(True)
             current.start()
         for app in self:
             if (app_name and app_name == app.name) or not app_name:
-                q.put(app)
-        q.join()
-        print 'Download/update complete'
+                queue.put(app)
+        queue.join()
+        self.logger.info('Download/update complete')
         for app in self:
             if app.has_patch():
                 print "\nDisplaying %s patch\n\n" % yellow(app.name)
                 app.display_patch()
-                option = raw_input("\nWould you like to apply this patch? (Y/n) ")
-                if option in ['Y', 'y', '']:
+                option = raw_input("\nWould you like to apply this patch? (y/N) ")
+                if option.lower()  == 'y':
                     app.apply_patch()
-                
+
     def load_apps(self):
         """ Parse the apps file and load each application to the list """
         cfg = ConfigHandler(self.location)
@@ -68,14 +76,7 @@ class RepositoryHandler(list):
             self.append(repo)
 
     def list_apps(self):
-        print "%s%s:%s" % (TermColors.HEADER,self.location,TermColors.ENDC)
+        print "%s%s:%s" % (TermColors.HEADER, self.location, TermColors.ENDC)
         for app in self:
-            print "\t%s%s%s\t%s" % (TermColors.YELLOW,app.name,TermColors.ENDC, app.url)
+            print "\t%s%s%s\t%s" % (TermColors.YELLOW, app.name, TermColors.ENDC, app.url)
 
-if __name__ == '__main__':
-    from os.path import join, abspath, dirname
-    deam_rel_root = dirname(dirname(abspath(__file__)))
-    rh = RepositoryHandler(join(deam_rel_root, 'testing'))
-    rh.execute(False)
-
-# vim: ai ts=4 sts=4 et sw=4

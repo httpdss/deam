@@ -1,8 +1,6 @@
 from django.conf import settings
 from os.path import lexists
 import os
-import re
-import fileinput
 
 
 def get_patch_directory():
@@ -12,12 +10,6 @@ def get_patch_directory():
         pre = '.patch'
     return os.path.join(get_project_root(), pre)
 
-def get_revision(revision):
-    rev = -1
-    m = re.search('Revision: (\d+)', revision)
-    if m:
-        rev = m.group(1)
-    return str(rev)
 
 def get_project_root():
     """ get the project root directory """
@@ -56,7 +48,7 @@ def directory_for_file(dir_name, file_name):
             fileList.extend(directory_for_file(dirfile, file_name))
     return fileList
 
-def detect_type(url):
+def detect_type(url, default = None):
     """
     method that tries to infer which is the type of the respository
     
@@ -69,7 +61,7 @@ def detect_type(url):
     elif 'hg' in url:
         return 'hg'
     else:
-        return None
+        return default
 
 
 class TermColors:
